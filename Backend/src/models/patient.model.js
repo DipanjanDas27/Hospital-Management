@@ -20,12 +20,12 @@ const medicineSchema = new Schema({
 })
 const prescriptionSchema= new Schema({
     doctorID:{
-        type:mongoose.Schema.type.ObjectID,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"Doctor",
         required:true,
     },
     patientID:{
-        type:mongoose.Schema.type.ObjectID,
+        type:mongoose.Schema.Types.ObjectID,
         ref:"Patient",
         required:true,
     },
@@ -100,14 +100,53 @@ const patientSchema = new Schema({
         type:prescriptionSchema,
         required:true,
     },
-    token:{
+    refreshtoken:{
         type:String,
-        required:true,
     },
     profilepicture: {
         type: String,
         required: true,
-    }
+    },
 },{timestamps:true})
+
+
+patientSchema.pre("save", async function (next) {
+    if (this.isModified("password"))
+        this.password = await brcypt.hash(this.password, 10)
+    next()
+})
+
+patientSchema.methods.ispasswordcorrect = async function (password) {
+    return await brcypt.compare(password, this.password)
+}
+
+patientSchema.methods.generateaccesstoken = function () {
+   return jwt.sign({
+        _id: this._id,
+        email: this.email,
+        adminname: this.patientname,
+        adminusername: this.patientusername
+
+    },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+
+}
+
+    patientSchema.methods.generaterefreshtoken = function () { 
+        return jwt.sign({
+            _id: this._id,
+            
+    
+        },
+            process.env.REFRESH_TOKEN_SECRET,
+            {
+                expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+            }
+        )
+    }
 
 export const Patient = mongoose.model("Patient", patientSchema)

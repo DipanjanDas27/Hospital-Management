@@ -87,7 +87,7 @@ const doctorSchema = new Schema({
         required: true,
     },
     department: {
-        type: mongoose.Schema.type.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Department",
         required: true,
     },
@@ -95,7 +95,7 @@ const doctorSchema = new Schema({
     hospitals: {
         type: [
             {
-                type: mongoose.Schema.type.ObjectId,
+                type: mongoose.Schema.Types.ObjectId,
                 ref: "Hospital"
             }
         ],
@@ -103,12 +103,52 @@ const doctorSchema = new Schema({
     },
     patientlist: {
         type: [{
-            type: mongoose.Schema.type.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: "Patient"
         }]
+    },
+    refreshtoken: {
+        type: String
     }
-
-
 }, { timestamps: true })
+
+doctorSchema.pre("save", async function (next) {
+    if (this.isModified("password"))
+        this.password = await brcypt.hash(this.password, 10)
+    next()
+})
+
+doctorSchema.methods.ispasswordcorrect = async function (password) {
+    return await brcypt.compare(password, this.password)
+}
+
+doctorSchema.methods.generateaccesstoken = function () {
+    return jwt.sign({
+        _id: this._id,
+        email: this.email,
+        adminname: this.doctorname,
+        adminusername: this.doctorusername
+
+    },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+
+}
+
+patientSchema.methods.generaterefreshtoken = function () {
+    return jwt.sign({
+        _id: this._id,
+
+
+    },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
 
 export const Doctor = mongoose.model("Doctor", doctorSchema)
