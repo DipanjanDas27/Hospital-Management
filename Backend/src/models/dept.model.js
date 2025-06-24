@@ -1,13 +1,13 @@
-import mongoose, { Schema } from "mongoose"
- const deptSchema = new Schema({
-    deptname:{
-        type:String,
-        required:true,
-        trim:true,
+import mongoose from "mongoose";
+const deptSchema = new mongoose.Schema({
+    deptname: {
+        type: String,
+        required: true,
+        index: true,
     },
-    description:{
-        type:String,
-        trim:true,
-    }
- })
- export const Department= mongoose.model("Department",deptSchema) 
+    description: {
+        type: String,
+        required: true,
+    },
+}, { timestamps: true });
+export const Department = mongoose.model("Department", deptSchema);

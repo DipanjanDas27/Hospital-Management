@@ -66,9 +66,14 @@ const adminSchema = new Schema({
         type: adminDocumentSchema,
         required: true,
     },
+    adminSecret: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     refreshtoken: {
         type: String
-    }
+    },
 }, { timestamps: true })
 
 adminSchema.pre("save", async function (next) {

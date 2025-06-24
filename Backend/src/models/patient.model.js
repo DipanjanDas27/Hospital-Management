@@ -91,9 +91,6 @@ const patientSchema = new Schema({
     },
     guardianName: {
         type: String,
-        required: function () {
-            return this.age < 18;
-        },
         trim: true
     },
     prescription:{
@@ -124,9 +121,8 @@ patientSchema.methods.generateaccesstoken = function () {
    return jwt.sign({
         _id: this._id,
         email: this.email,
-        adminname: this.patientname,
-        adminusername: this.patientusername
-
+        patientname: this.patientname,
+        patientusername: this.patientusername
     },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -139,8 +135,7 @@ patientSchema.methods.generateaccesstoken = function () {
     patientSchema.methods.generaterefreshtoken = function () { 
         return jwt.sign({
             _id: this._id,
-            
-    
+
         },
             process.env.REFRESH_TOKEN_SECRET,
             {

@@ -87,25 +87,14 @@ const doctorSchema = new Schema({
         required: true,
     },
     department: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Department",
+        type: String,
         required: true,
     },
 
-    hospitals: {
-        type: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Hospital"
-            }
-        ],
+    hospital: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hospital",
         required: true,
-    },
-    patientlist: {
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Patient"
-        }]
     },
     refreshtoken: {
         type: String
@@ -126,8 +115,8 @@ doctorSchema.methods.generateaccesstoken = function () {
     return jwt.sign({
         _id: this._id,
         email: this.email,
-        adminname: this.doctorname,
-        adminusername: this.doctorusername
+        doctorname: this.doctorname,
+        doctorusername: this.doctorusername
 
     },
         process.env.ACCESS_TOKEN_SECRET,
@@ -138,7 +127,7 @@ doctorSchema.methods.generateaccesstoken = function () {
 
 }
 
-patientSchema.methods.generaterefreshtoken = function () {
+doctorSchema.methods.generaterefreshtoken = function () {
     return jwt.sign({
         _id: this._id,
 

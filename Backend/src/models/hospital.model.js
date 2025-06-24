@@ -1,21 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-const hospitalDocumentSchema = new Schema({
-    registrationcertificate: {
-        type: String,
-        required: true,
-    },
-    ownerId: {
-        type: String,
-        required: true,
-    },
-    tradelicense: {
-        type: String,
-        required: true,
-    },
-    NOC: {
-        type: String,
-    }
-})
 const hospitalSchema = new Schema({
     hospitalname: {
         type: String,
@@ -41,10 +24,7 @@ const hospitalSchema = new Schema({
         type: String,
         required: true
     },
-    verificationdocs: {
-        type: hospitalDocumentSchema,
-        required:true,
-    },
+    
     department: {
         type: [
             {
