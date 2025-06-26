@@ -25,7 +25,7 @@ const prescriptionSchema= new Schema({
         required:true,
     },
     patientID:{
-        type:mongoose.Schema.Types.ObjectID,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"Patient",
         required:true,
     },
@@ -91,11 +91,12 @@ const patientSchema = new Schema({
     },
     guardianName: {
         type: String,
-        trim: true
+        trim: true,
+        required:true,
     },
     prescription:{
         type:prescriptionSchema,
-        required:true,
+        
     },
     refreshtoken:{
         type:String,
