@@ -19,20 +19,27 @@ const apointmentSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    appointmenttime:{
+    appointmenttime: {
         type: String,
         required: true,
     },
-    uniqueId: {
+    symptoms: {
+        type: String,
+        trim: true,
+    },
+    medicalhistory:{
+        type:String,
+    },
+    uniquecode: {
         type: String,
         required: true,
         unique: true,
     },
     status: {
         type: String,
-        enum: ['Pending', 'Confirmed', 'Cancelled'],
+        enum: ['Pending', 'Confirmed', 'Cancelled', 'Completed'],
         default: 'Pending',
     },
-}, 
-{ timestamps: true,});
+},
+    { timestamps: true, });
 export const Appointment = mongoose.model('Appointment', apointmentSchema);

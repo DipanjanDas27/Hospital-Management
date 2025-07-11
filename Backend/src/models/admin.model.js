@@ -1,12 +1,12 @@
 import mongoose, { Schema } from "mongoose";
-import brcypt from "bcrypt";
-import jwt from "jasonwebtoken";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 const adminDocumentSchema = new Schema({
     aadhar: {
         type: String,
         required: true,
     },
-    hospitalId: {
+    adminId: {
         type: String,
         required: true,
     },
@@ -14,14 +14,12 @@ const adminDocumentSchema = new Schema({
         type: String,
         required: true,
     },
-    authletter: {
-        type: String,
-    },
     appointmentletter: {
         type: String,
+        required: true,
     },
 
-})
+}, { _id: false })
 const adminSchema = new Schema({
     adminname: {
         type: String,
@@ -52,24 +50,18 @@ const adminSchema = new Schema({
     phonenumber: {
         type: Number,
         required: true,
-        maxlength: 10,
-    },
-    sex: {
-        type: String,
-        enum: ["Male", "Female", "Others"]
-    },
-    age: {
-        type: Number,
-        required: true,
+        unique: true,
+        trim: true,
     },
     verificationdocs: {
         type: adminDocumentSchema,
         required: true,
     },
-    adminSecret: {
+    adminsecret: {
         type: String,
         required: true,
         unique: true,
+        trim: true,
     },
     refreshtoken: {
         type: String
@@ -78,20 +70,29 @@ const adminSchema = new Schema({
 
 adminSchema.pre("save", async function (next) {
     if (this.isModified("password"))
-        this.password = await brcypt.hash(this.password, 10)
+        this.password = await bcrypt.hash(this.password, 10)
+    next()
+})
+adminSchema.pre("save", async function (next) {
+    if (this.isModified("adminsecret"))
+        this.adminsecret = await bcrypt.hash(this.adminsecret, 10)
     next()
 })
 
 adminSchema.methods.ispasswordcorrect = async function (password) {
-    return await brcypt.compare(password, this.password)
+    return await bcrypt.compare(password, this.password)
+}
+adminSchema.methods.isadminsecretcorrect = async function (adminsecret) {
+    return await bcrypt.compare(adminsecret, this.adminsecret)
 }
 
 adminSchema.methods.generateaccesstoken = function () {
-   return jwt.sign({
+    return jwt.sign({
         _id: this._id,
         email: this.email,
         adminname: this.adminname,
-        adminusername: this.adminusername
+        adminusername: this.adminusername,
+        role: "admin"
 
     },
         process.env.ACCESS_TOKEN_SECRET,
@@ -102,17 +103,17 @@ adminSchema.methods.generateaccesstoken = function () {
 
 }
 
-    adminSchema.methods.generaterefreshtoken = function () { 
-        return jwt.sign({
-            _id: this._id,
-            
-    
-        },
-            process.env.REFRESH_TOKEN_SECRET,
-            {
-                expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-            }
-        )
-    }
+adminSchema.methods.generaterefreshtoken = function () {
+    return jwt.sign({
+        _id: this._id,
 
-    export const Admin = mongoose.model("Admin", adminSchema)
+
+    },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
+
+export const Admin = mongoose.model("Admin", adminSchema)

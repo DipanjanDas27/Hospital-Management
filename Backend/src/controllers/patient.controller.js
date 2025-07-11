@@ -4,25 +4,36 @@ import { uploadcloudinary } from '../utils/cloudinary.js';
 import { apiError } from '../utils/apiError.js';
 import { apiResponse } from '../utils/apiResponse.js';
 
-const generateaccesstokenandrefreshtoken = asyncHandler(async (patientId) => {
-    const patient = await Patient.findById(patientId)
-    const accesstoken = await patient.generateaccesstoken()
-    const refreshtoken = await patient.generaterefreshtoken()
-    if (!accesstoken && !refreshtoken) {
-        throw new apiError(500, "Token generation failed")
+const generateaccesstokenandrefreshtoken = async (patientId) => {
+  try {
+    const patient = await Patient.findById(patientId);
+    const accesstoken = await patient.generateaccesstoken();
+    const refreshtoken = await patient.generaterefreshtoken();
+
+    if (!accesstoken) {
+      throw new apiError(500, "Access token generation failed");
     }
-    if (refreshtoken) {
-        patient.refreshtoken = refreshtoken
-        await patient.save({ validateBeforeSave: false })
+
+    if (!refreshtoken) {
+      throw new apiError(500, "Refresh token generation failed");
     }
-    return { accesstoken, refreshtoken }
-})
+
+    patient.refreshtoken = refreshtoken;
+    await patient.save({ validateBeforeSave: false });
+
+    return { accesstoken, refreshtoken };
+
+  } catch (error) {
+    console.error("Token generation failed:", error);
+    throw error; 
+  }
+};
 
 const registerPatient = asyncHandler(async (req, res) => {
-    const { patientname, patientusername, email, password, phonenumber, age, sex, guardianname } = req.body
+    const { patientname, patientusername, email, password, phonenumber, age, sex, guardianName } = req.body
 
     if (
-        [patientname, patientusername, email, phonenumber, age, sex, password, guardianname].some((field) => field?.trim() === "")
+        [patientname, patientusername, email, phonenumber, age, sex, password, guardianName].some((field) => !field || field?.trim() === "")
     ) {
         throw new apiError(400, "All fields are required")
     }
@@ -32,45 +43,45 @@ const registerPatient = asyncHandler(async (req, res) => {
     if (existedpatient) {
         throw new apiError(409, "patient with same email or username already exist")
     }
-    let profilepicturelocalpath;
-    if (req.files && Array.isArray(req.files.profilepicture) && req.files.profilepicture.length > 0) {
-        profilepicturelocalpath = req.files.profilepicture[0].path
+    let profilepicture = { url: "" };
+
+    if (req.file?.path) {
+        const profilepicturelocalpath = req.file.path;
+        profilepicture = await uploadcloudinary(profilepicturelocalpath);
     }
-
-    const profilepicture = await uploadcloudinary(profilepicturelocalpath)
-
     const patient = await Patient.create({
         patientname,
-        patientusername: patientusername.toLowerCase(),
+        patientusername,
         email,
         password,
         phonenumber,
         age,
         sex,
-        guardianname,
+        guardianName,
         profilepicture: profilepicture.url || ""
     })
 
     if (!patient) {
         throw new apiError(500, "Patient registration failed")
     }
-    if (patient) {
-        const createdpatient = await Patient.findById(patient._id).select("-password -refreshtoken")
-        return res.status(201).json(
-            new apiResponse(200, createdpatient, "patient registered Successfully")
-        )
-    }
+
+    const createdpatient = await Patient.findById(patient._id).select("-password -refreshtoken")
+    return res.status(201).json(
+        new apiResponse(200, createdpatient, "patient registered Successfully")
+    )
+
 })
 
 const loginPatient = asyncHandler(async (req, res) => {
     const { email, patientusername, password } = req.body
-    if (
-        [email, patientusername, password].some((field) => field?.trim() === "")
-    ) {
-        throw new apiError(400, "Email or Username and password are required")
+    if (!patientusername && !email) {
+        throw new apiError(400, "Email or Username is required")
     }
-    const existedpatient = await Patient.findone({
-        $or: [{ email }, { patientusername }]
+    if (!password) {
+        throw new apiError(400, "Password is required")
+    }
+    const existedpatient = await Patient.findOne({
+        $or: [{ patientusername }, { email }]
     })
     if (!existedpatient) {
         throw new apiError(404, "Patient not found")
@@ -79,8 +90,8 @@ const loginPatient = asyncHandler(async (req, res) => {
     if (!ispassword) {
         throw new apiError(401, "Invalid password")
     }
-    const { accesstoken, refreshtoken } = generateaccesstokenandrefreshtoken(existedpatient._id)
-    const loggedinpatient = await User.findById(existedpatient._id).select("-password -refreshToken")
+    const { accesstoken, refreshtoken } = await generateaccesstokenandrefreshtoken(existedpatient._id)
+    const loggedinpatient = await Patient.findById(existedpatient._id).select("-password -refreshtoken")
 
     const options = {
         httpOnly: true,
@@ -90,8 +101,8 @@ const loginPatient = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .cookie("accessToken", accesstoken, options)
-        .cookie("refreshToken", refreshtoken, options)
+        .cookie("accesstoken", accesstoken, options)
+        .cookie("refreshtoken", refreshtoken, options)
         .json(
             new apiResponse(
                 200,
@@ -104,11 +115,11 @@ const loginPatient = asyncHandler(async (req, res) => {
 })
 
 const logoutPatient = asyncHandler(async (req, res) => {
-     await User.findByIdAndUpdate(
+    await Patient.findByIdAndUpdate(
         req.patient._id,
         {
             $unset: {
-                refreshToken: 1 
+                refreshToken: 1
             }
         },
         {
@@ -122,10 +133,10 @@ const logoutPatient = asyncHandler(async (req, res) => {
     }
 
     return res
-    .status(200)
-    .clearCookie("accesstoken", options)
-    .clearCookie("refreshtoken", options)
-    .json(new apiResponse(200, {}, "User logged Out"))
+        .status(200)
+        .clearCookie("accesstoken", options)
+        .clearCookie("refreshtoken", options)
+        .json(new apiResponse(200, {}, "User logged Out"))
 })
 
 

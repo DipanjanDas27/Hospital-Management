@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 const doctorDocumentSchema = new Schema({
-    adhaar: {
+    aadhar: {
         type: String,
         required: true
     },
@@ -8,7 +10,7 @@ const doctorDocumentSchema = new Schema({
         type: String,
         required: true,
     },
-    mcismccertificate: {
+    medicallicense: {
         type: String,
         required: true,
     },
@@ -16,19 +18,28 @@ const doctorDocumentSchema = new Schema({
         type: String,
         required: true,
     },
-})
+},{_id: false })
 const timeSchema = new Schema({
     day: {
         type: String,
         required: true,
-        trim: true,
+        enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday","Monday-Saturday"],
     },
-    time: {
+    starttime: {
         type: String,
         required: true,
         trim: true
-    }
-})
+    },
+    endtime: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    patientslot: {
+        type: Number,
+        required: true,
+    }  
+},{ _id: false })
 const doctorSchema = new Schema({
     doctorname: {
         type: String,
@@ -60,7 +71,7 @@ const doctorSchema = new Schema({
     phonenumber: {
         type: Number,
         required: true,
-        maxlength: 10,
+        maxlength: 10, 
     },
     sex: {
         type: String,
@@ -75,7 +86,7 @@ const doctorSchema = new Schema({
         required: true,
     },
     experience: {
-        type: Number,
+        type: String,
         required: true,
     },
     qualification: {
@@ -91,9 +102,8 @@ const doctorSchema = new Schema({
         required: true,
     },
 
-    hospital: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Hospital",
+    hospitalname:{
+        type: String,
         required: true,
     },
     refreshtoken: {
@@ -103,12 +113,12 @@ const doctorSchema = new Schema({
 
 doctorSchema.pre("save", async function (next) {
     if (this.isModified("password"))
-        this.password = await brcypt.hash(this.password, 10)
+        this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
 doctorSchema.methods.ispasswordcorrect = async function (password) {
-    return await brcypt.compare(password, this.password)
+    return await bcrypt.compare(password, this.password)
 }
 
 doctorSchema.methods.generateaccesstoken = function () {
@@ -116,7 +126,8 @@ doctorSchema.methods.generateaccesstoken = function () {
         _id: this._id,
         email: this.email,
         doctorname: this.doctorname,
-        doctorusername: this.doctorusername
+        doctorusername: this.doctorusername,
+        role: "doctor"
 
     },
         process.env.ACCESS_TOKEN_SECRET,
