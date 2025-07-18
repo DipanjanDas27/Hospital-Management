@@ -3,6 +3,10 @@ import { Admin } from "../models/admin.model.js";
 import { apiError } from "../utils/apiError.js";
 import { uploadcloudinary } from "../utils/cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
+import sendMail from "../services/mail.service.js";
+import { welcomeemailtemplate, logintemplate } from "../utils/emailtemplate.js";
+import jwt from "jsonwebtoken";
+
 const generateaccesstokenandrefreshtoken = async (adminid) => {
     try {
         const admin = await Admin.findById(adminid)
@@ -77,6 +81,13 @@ const registeradmin = asyncHandler(async (req, res) => {
     }
 
     const createdAdmin = await Admin.findById(admin._id).select("-password -refreshtoken, -adminsecret")
+
+    await sendMail({
+        to: email,
+        subject: `Welcome to NovaMed, ${createdAdmin.adminname}! Your Registration is Successful`,
+        html: welcomeemailtemplate(createdAdmin.adminname),
+    })
+
     return res
         .status(201)
         .json(
@@ -117,6 +128,12 @@ const loginadmin = asyncHandler(async (req, res) => {
     if (!loggedinadmin) {
         throw new apiError(500, "Admin login failed")
     }
+    await sendMail({
+        to: email,
+        subject: `Login Alert – NovaMed Account Accessed Successfully`,
+        html: logintemplate(loggedinadmin.adminname),
+    });
+
     const options = {
         httpOnly: true,
         secure: true
@@ -143,4 +160,134 @@ const logoutadmin = asyncHandler(async (req, res, next) => {
         .json(new apiResponse(200, {}, "Admin logged out successfully"))
 })
 
-export { registeradmin, loginadmin, logoutadmin } 
+const accesstokenrenewal = asyncHandler(async (req, res) => {
+    const { refreshtoken } = req.cookies || req.body;
+
+    if (!refreshtoken) {
+        throw new apiError(401, "Unauthorized request");
+    }
+    const decodetoken = jwt.verify(refreshtoken, process.env.REFRESH_TOKEN_SECRET);
+    if (!decodetoken) {
+        throw new apiError(401, "invalid refresh token");
+    }
+    const admin = await Admin.findById(decodetoken._id);
+    if (!admin) {
+        throw new apiError(404, "Patient not found");
+    }
+    if (admin.refreshtoken !== refreshtoken) {
+        throw new apiError(401, "Invalid refresh token or token is expired");
+    }
+    const { accesstoken, newrefreshtoken } = await generateaccesstokenandrefreshtoken(admin._id);
+
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res
+        .status(200)
+        .cookie("accesstoken", accesstoken, options)
+        .cookie("refreshtoken", newrefreshtoken, options)
+        .json(new apiResponse(200, { accesstoken, refreshtoken: newrefreshtoken }, "Access token renewed successfully"));
+
+})
+
+const updatepassword = asyncHandler(async (req, res) => {
+    const { oldpassword, newpassword } = req.body;
+
+    if (!oldpassword || !newpassword) {
+        throw new apiError(400, "Old password and new password are required");
+    }
+    if (oldpassword === newpassword) {
+        throw new apiError(400, "New password cannot be the same as old password");
+    }
+    const admin = await Admin.findById(req.admin?._id);
+    if (!admin) throw new apiError(404, "Admin not found");
+
+    const ispasswordvalid = await admin.ispasswordcorrect(oldpassword);
+    if (!ispasswordvalid) {
+        throw new apiError(401, "Old password is incorrect");
+    }
+    admin.password = newpassword;
+    await admin.save({ validateBeforeSave: false });
+
+    return res.status(200).json(new apiResponse(200, {}, "Password updated successfully"));
+})
+
+const resetForgottenPassword = asyncHandler(async (req, res) => {
+    const { newpassword } = req.body;
+    if (!newpassword) throw new apiError(400, "New password is required");
+
+    const admin = await Admin.findById(req.user?._id);
+    if (!admin) throw new apiError(404, "Admin not found");
+
+    admin.password = newpassword;
+    await admin.save({ validateBeforeSave: false });
+
+    return res.status(200).json(new apiResponse(200, {}, "Password reset successfully"));
+});
+
+const updateprofile = asyncHandler(async (req, res) => {
+    const { adminname, email, phonenumber } = req.body;
+
+    const updates = {};
+    if (adminname) updates.adminname = adminname;
+    if (email) updates.email = email;
+    if (phonenumber) updates.phonenumber = phonenumber;
+
+    if (Object.keys(updates).length === 0) {
+        throw new apiError(400, "At least one field is required to update");
+    }
+
+    const updatedadmin = await Admin.findByIdAndUpdate(
+        req.admin?._id,
+        { $set: updates },
+        { new: true }
+    ).select("-password  -adminsecret");
+
+    if (!updatedadmin) {
+        throw new apiError(404, "Admin not found");
+    }
+
+    return res
+        .status(200)
+        .json(new apiResponse(200, updatedadmin, "Profile updated successfully"));
+});
+
+const getprofiledetails = asyncHandler(async (req, res) => {
+    const admin = await Admin.findById(req.admin?._id).select(" -password -adminsecret")
+    if (!admin) throw new apiError(404, "Admin not found");
+
+    return res.status(200)
+        .json(new apiResponse(200, admin, "profile fetched successfully"))
+})
+
+const updateprofilepic = asyncHandler(async (req, res) => {
+    const profilepicturelocalpath = req.file?.path
+    if (!profilepicturelocalpath) {
+        throw new apiError(400, "profilepicture not found ")
+    }
+    const profilepicture = await uploadcloudinary(profilepicturelocalpath)
+    if (!profilepicture) {
+        throw new apiError(400, "profilepicture upload failed to server")
+    }
+    const updatedadmin = await Admin.findByIdAndUpdate(
+        req.admin?._id,
+        {
+            $set: {
+                profilepicture: profilepicture.url
+            }
+        },
+        {
+            new: true
+        }).select("-password")
+
+    if (!updatedadmin) {
+        throw new apiError(404, "Admin not found")
+    }
+
+    res.status(200)
+        .json(new apiResponse(200, updatedadmin, "profilepicture updated successfully"))
+})
+
+export { registeradmin, loginadmin, logoutadmin, updateprofile, updatepassword, resetForgottenPassword, getprofiledetails, accesstokenrenewal, updateprofilepic } 

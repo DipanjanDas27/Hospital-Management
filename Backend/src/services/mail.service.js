@@ -1,0 +1,26 @@
+import createTransporter from '../config/nodemailer.config.js';
+
+const SENDER_EMAIL = process.env.SENDER_EMAIL;
+
+const sendMail = async ({ to, subject, html }) => {
+  try {
+    const transporter = await createTransporter();
+
+    const mailOptions = {
+      from: SENDER_EMAIL,
+      to,
+      subject,
+      html,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully:', result);
+    return result;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw new Error('Failed to send email');
+
+  }
+};
+
+export default sendMail;

@@ -19,7 +19,7 @@ const verifydoctor = asyncHandler(async (req, res, next) => {
         req.doctor = doctor;
         next();
     } catch (error) {
-        throw new ApiError(401, error?.message || "Invalid access token");
+        throw new apiError(401, error?.message || "Invalid access token");
     }
 })
 export { verifydoctor };
