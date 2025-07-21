@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import oauth2Client from './oauth.config.js';
+import oauth2Client from './oauth.js';
 
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 

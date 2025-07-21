@@ -1,4 +1,4 @@
-import createTransporter from '../config/nodemailer.config.js';
+import createTransporter from './nodemailer.js';
 
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
@@ -14,7 +14,6 @@ const sendMail = async ({ to, subject, html }) => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result);
     return result;
   } catch (error) {
     console.error('Error sending email:', error);

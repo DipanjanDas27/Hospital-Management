@@ -3,7 +3,7 @@ import { Admin } from "../models/admin.model.js";
 import { apiError } from "../utils/apiError.js";
 import { uploadcloudinary } from "../utils/cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import sendMail from "../services/mail.service.js";
+import sendMail from "../services/mail.js";
 import { welcomeemailtemplate, logintemplate } from "../utils/emailtemplate.js";
 import jwt from "jsonwebtoken";
 

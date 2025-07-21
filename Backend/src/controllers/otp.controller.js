@@ -1,9 +1,9 @@
-import sendMail from "../services/mail.service.js";
+import sendMail from "../services/mail.js";
 import { asyncHandler } from "../utils/asynchandler.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { apiError } from "../utils/apiError.js";
 import generateOtp from "../utils/otpgenerator.js";
-import { saveOTP, getOTP, clearOTP } from "../services/otp.service.js";
+import { saveOTP, getOTP, clearOTP } from "../services/otp.js";
 import { Patient } from "../models/patient.model.js";
 import { Admin } from "../models/admin.model.js";
 import { Doctor } from "../models/doctor.model.js";
