@@ -243,7 +243,7 @@ const updateprofile = asyncHandler(async (req, res) => {
         req.admin?._id,
         { $set: updates },
         { new: true }
-    ).select("-password  -adminsecret");
+    ).select("-password -refreshtoken -adminsecret");
 
     if (!updatedadmin) {
         throw new apiError(404, "Admin not found");
@@ -255,7 +255,7 @@ const updateprofile = asyncHandler(async (req, res) => {
 });
 
 const getprofiledetails = asyncHandler(async (req, res) => {
-    const admin = await Admin.findById(req.admin?._id).select(" -password -adminsecret")
+    const admin = await Admin.findById(req.admin?._id).select(" -password -refreshtoken -adminsecret")
     if (!admin) throw new apiError(404, "Admin not found");
 
     return res.status(200)
@@ -280,7 +280,7 @@ const updateprofilepic = asyncHandler(async (req, res) => {
         },
         {
             new: true
-        }).select("-password")
+        }).select("-password -refreshtoken -adminsecret")
 
     if (!updatedadmin) {
         throw new apiError(404, "Admin not found")

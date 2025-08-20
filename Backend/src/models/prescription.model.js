@@ -19,14 +19,12 @@ const medicineSchema = new Schema({
 
 })
 const prescriptionSchema = new Schema({
-    doctorID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Doctor",
+    doctordetails: {
+        type: mongoose.Schema.Types.Mixed,
         required: true,
     },
-    patientID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient",
+    patientdetails: {
+        type: mongoose.Schema.Types.Mixed,
         required: true,
     },
     diagonosis: {

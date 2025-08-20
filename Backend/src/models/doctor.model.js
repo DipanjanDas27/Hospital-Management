@@ -18,12 +18,12 @@ const doctorDocumentSchema = new Schema({
         type: String,
         required: true,
     },
-},{_id: false })
+}, { _id: false })
 const timeSchema = new Schema({
     day: {
         type: String,
         required: true,
-        enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday","Monday-Saturday"],
+        enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
     },
     starttime: {
         type: String,
@@ -38,8 +38,8 @@ const timeSchema = new Schema({
     patientslot: {
         type: Number,
         required: true,
-    }  
-},{ _id: false })
+    }
+}, { _id: false })
 const doctorSchema = new Schema({
     doctorname: {
         type: String,
@@ -71,7 +71,7 @@ const doctorSchema = new Schema({
     phonenumber: {
         type: Number,
         required: true,
-        maxlength: 10, 
+        maxlength: 10,
     },
     sex: {
         type: String,
@@ -101,8 +101,11 @@ const doctorSchema = new Schema({
         type: String,
         required: true,
     },
-
-    hospitalname:{
+    specialization: {
+        type: String,
+        required: true,
+    },
+    hospitalname: {
         type: String,
         required: true,
     },

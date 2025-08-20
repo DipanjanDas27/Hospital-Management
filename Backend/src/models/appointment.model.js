@@ -1,18 +1,13 @@
 import mongoose from 'mongoose';
 const apointmentSchema = new mongoose.Schema({
-    patientId: {
-        type: mongoose.Schema.Types.ObjectId,
+    patientdetails: {
+        type: mongoose.Schema.Types.Mixed,
         ref: 'Patient',
         required: true,
     },
-    doctorId: {
-        type: mongoose.Schema.Types.ObjectId,
+    doctordetails: {
+        type: mongoose.Schema.Types.Mixed,
         ref: 'Doctor',
-        required: true,
-    },
-    departmentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Department',
         required: true,
     },
     appointmentdate: {
@@ -27,8 +22,8 @@ const apointmentSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    medicalhistory:{
-        type:String,
+    medicalhistory: {
+        type: String,
     },
     uniquecode: {
         type: String,
@@ -40,6 +35,11 @@ const apointmentSchema = new mongoose.Schema({
         enum: ['Pending', 'Confirmed', 'Cancelled', 'Completed'],
         default: 'Pending',
     },
+    deleteafter: {
+        type: Date,
+        default: null,
+        index: { expireAfterSeconds: 0 }
+    }
 },
     { timestamps: true, });
 export const Appointment = mongoose.model('Appointment', apointmentSchema);

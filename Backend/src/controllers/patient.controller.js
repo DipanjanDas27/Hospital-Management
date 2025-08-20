@@ -238,7 +238,7 @@ const updateprofile = asyncHandler(async (req, res) => {
         req.patient._id,
         { $set: updates },
         { new: true }
-    ).select("-password ");
+    ).select("-password -refreshtoken");
 
     if (!updatedPatient) {
         throw new apiError(404, "Patient not found");
@@ -250,7 +250,7 @@ const updateprofile = asyncHandler(async (req, res) => {
 });
 
 const getprofiledetails = asyncHandler(async (req, res) => {
-    const patient = await Patient.findById(req.patient?._id).select("-password")
+    const patient = await Patient.findById(req.patient?._id).select("-password -refreshtoken")
     if (!patient) {
         throw new apiError(404, "patient not found")
     }
@@ -276,7 +276,7 @@ const updateprofilepic = asyncHandler(async (req, res) => {
         },
         {
             new: true
-        }).select("-password")
+        }).select("-password -refreshtoken")
     if (!updatedpatient) {
         throw new apiError(404, "Patient not dound")
     }

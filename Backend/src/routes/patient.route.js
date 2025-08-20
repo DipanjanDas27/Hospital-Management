@@ -13,12 +13,13 @@ import {
 import {
     sendotp,
     verifyotp,
-    sendForgetPasswordOtp,
+    sendForgetPasswordOtp, 
     verifyForgotPasswordOtp,
 } from "../controllers/otp.controller.js";
 import { verifypatient } from "../middlewares/patientauth.middleware.js"
 import { upload } from '../middlewares/multer.middleware.js';
 import { verifyTempjwt } from '../middlewares/verifytempjwt.middleware.js';
+import { getalldoctorprofiledetails, getdoctorprofiledetails } from '../controllers/doctor.controller.js';
 
 const router = Router();
 
@@ -26,18 +27,22 @@ router.route("/register").post(upload.single("profilepicture"), registerPatient)
 router.route("/login").post(loginPatient);
 router.route("/logout").post(verifypatient, logoutPatient);
 router.route("/update-profile").patch(verifypatient, updateprofile);
+router.route("/update-profilepicture").patch(verifypatient, upload.single("profilepicture"), updateprofilepic);
 router.route("/get-profile").get(verifypatient, getprofiledetails);
 router.route("/renew-access-token").post(accesstokenrenewal);
 
-router.route("/update-password/send-otp").post( verifypatient, sendotp);          
-router.route("/update-password/verify-otp").post( verifypatient, verifyotp);     
-router.route("/update-password").patch( verifypatient, updatepassword); 
+router.route("/update-password/send-otp").post(verifypatient, sendotp);
+router.route("/update-password/verify-otp").post(verifypatient, verifyotp);
+router.route("/update-password").patch(verifypatient, updatepassword);
 
-router.route("/forgot-password/send-otp").post( sendForgetPasswordOtp);          
-router.route("/forgot-password/verify-otp").post( verifyTempjwt,verifyForgotPasswordOtp);      
-router.route("/forgot-password/update-password").patch( verifyTempjwt, resetForgottenPassword); 
+router.route("/forgot-password/send-otp").post(sendForgetPasswordOtp);
+router.route("/forgot-password/verify-otp").post(verifyTempjwt, verifyForgotPasswordOtp);
+router.route("/forgot-password/update-password").patch(verifyTempjwt, resetForgottenPassword);
 
-router.route("/update-profilepicture").patch(verifypatient,upload.single("profilepicture"), updateprofilepic);
+router.route("/doctors/:doctorid").get(verifypatient, getdoctorprofiledetails);
+router.route("/doctors").get(verifypatient, getalldoctorprofiledetails);
+
+
 
 
 
