@@ -1,12 +1,10 @@
-import DoctorSignup from "./pages/Doctorsignup"
-import NovaMedLanding from "./pages/landingpage"
-import Patientsignup from "./pages/Patientsignup"
+import BookAppointment from "./pages/Appointment"
 function App() {
 
   return (
     <>
-
-      <NovaMedLanding />
+    <BookAppointment/>
+      
     </>
   )
 }
