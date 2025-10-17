@@ -20,6 +20,7 @@
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.507.0",
     "react": "^19.0.0",
+    "react-datepicker": "^8.7.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.0",
     "react-redux": "^9.2.0",
