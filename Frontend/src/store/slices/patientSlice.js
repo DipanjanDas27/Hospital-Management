@@ -12,16 +12,19 @@ import {
   resetForgottenPassword,
   getAllDoctors,
   getDoctorProfile,
+  getAllDepartments,
+  getdoctorbydepartment,
 } from "../../services/patientApi";
 
 const initialState = {
-  patientProfile: null,
+  profile: null,
   doctorProfile: null,
   doctors: [],
   loading: false,
   error: null,
-  otpStatus: null,           
+  otpStatus: null,
   passwordResetStatus: null,
+  departments: [],
 };
 
 const patientSlice = createSlice({
@@ -29,43 +32,30 @@ const patientSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    
-  builder.addMatcher(isPending, (state, action) => {
-    state.loading = true;
-    state.error = null;
-  });
 
-  builder.addMatcher(isFulfilled, (state, action) => {
-    state.loading = false;
-  });
+    builder.addCase(getProfileDetails.fulfilled, (state, action) => {
+      state.profile = action.payload;
+    })
 
-  builder.addMatcher(isRejected, (state, action) => {
-    state.loading = false;
-    state.error = action.payload;
-  });
-  
-      builder.addCase(getProfileDetails.fulfilled, (state, action) => {
-        state.profile = action.payload;
-      })
-    
-      builder.addCase(updateProfile.fulfilled, (state, action) => {
-        state.profile = { ...state.profile, ...action.payload };
-      });
-      
-      builder.addCase(updateProfilePic.fulfilled, (state, action) => {
-        if (state.profile) {
-          state.profile.profilePic = action.payload.profilePic;
-        }
-      });
-      
-      builder.addCase(getAllDoctors.fulfilled, (state, action) => {
-        state.doctors = action.payload;
-      })
+    builder.addCase(updateProfile.fulfilled, (state, action) => {
+      state.profile = { ...state.profile, ...action.payload };
+    });
 
-      builder.addCase(getDoctorProfile.fulfilled, (state, action) => {
-        state.doctorProfile = action.payload; 
-      })
-      
+    builder.addCase(updateProfilePic.fulfilled, (state, action) => {
+      if (state.profile) {
+        state.profile.profilePic = action.payload.profilePic;
+      }
+    });
+
+    builder.addCase(getAllDoctors.fulfilled, (state, action) => {
+      state.doctors = action.payload;
+    })
+
+    builder.addCase(getDoctorProfile.fulfilled, (state, action) => {
+      state.doctorProfile = action.payload;
+    })
+
+
     builder.addCase(sendOtpForUpdate.fulfilled, (state, action) => {
       state.otpStatus = "sent";
     });
@@ -90,7 +80,29 @@ const patientSlice = createSlice({
       state.passwordResetStatus = "reset_success";
     });
 
-    }
+    builder.addCase(getAllDepartments.fulfilled, (state, action) => {
+      state.departments = action.payload;
+    })
+
+    builder.addCase(getdoctorbydepartment.fulfilled, (state, action) => {
+      state.doctors = action.payload;
+    })
+
+    builder.addMatcher(isPending, (state, action) => {
+      state.loading = true;
+      state.error = null;
+    });
+
+    builder.addMatcher(isFulfilled, (state, action) => {
+      state.loading = false;
+    });
+
+    builder.addMatcher(isRejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
+
+  }
 });
 
 export default patientSlice.reducer;

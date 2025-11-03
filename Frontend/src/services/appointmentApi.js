@@ -1,11 +1,11 @@
-import { createAsyncThunk } from "@reduxjs/toolkitt"
+import { createAsyncThunk } from "@reduxjs/toolkit"
 import api from "./api";
 
 
 export const checkAvailability = createAsyncThunk("appointment/checkAvailability", async (params, { rejectWithValue }) => {
   try {
-    const res = await api.get("/availability", { params });
-    return res.data;
+    const res = await api.get("/appointments/availability", { params });
+    return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);
   }
@@ -14,8 +14,8 @@ export const checkAvailability = createAsyncThunk("appointment/checkAvailability
 
 export const getAllAppointments = createAsyncThunk("appointment/getAllAppointments", async (_, { rejectWithValue }) => {
   try {
-    const res = await api.get("/");
-    return res.data;
+    const res = await api.get("/appointments/");
+    return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);
   }
@@ -24,8 +24,8 @@ export const getAllAppointments = createAsyncThunk("appointment/getAllAppointmen
 
 export const createAppointment = createAsyncThunk("appointment/createAppointment", async ({ doctorId, payload }, { rejectWithValue }) => {
   try {
-    const res = await api.post(`/${doctorId}`, payload);
-    return res.data;
+    const res = await api.post(`/appointments/book-appointment/${doctorId}`, payload);
+    return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);
   }
@@ -34,18 +34,18 @@ export const createAppointment = createAsyncThunk("appointment/createAppointment
 
 export const cancelAppointment = createAsyncThunk("appointment/cancelAppointment", async (appointmentId, { rejectWithValue }) => {
   try {
-    const res = await api.post(`/${appointmentId}/cancel`);
-    return res.data;
+    const res = await api.post(`/appointments/cancelAppointment/${appointmentId}`);
+    return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);
   }
 });
 
 
-export const updateAppointment = createAsyncThunk("appointment/updateAppointment", async ({ appointmentId, payload }, { rejectWithValue }) => {
+export const updateAppointment = createAsyncThunk("appointment/updateAppointment", async ({ appointmentid, payload }, { rejectWithValue }) => {
   try {
-    const res = await api.patch(`/${appointmentId}/update`, payload);
-    return res.data;
+    const res = await api.patch(`/appointments/updateappointment/${appointmentid}`, payload);
+    return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);
   }
@@ -54,8 +54,8 @@ export const updateAppointment = createAsyncThunk("appointment/updateAppointment
 
 export const getAppointmentDetails = createAsyncThunk("appointment/getAppointmentDetails", async (appointmentId, { rejectWithValue }) => {
   try {
-    const res = await api.get(`/${appointmentId}`);
-    return res.data;
+    const res = await api.get(`/appointments/${appointmentId}`);
+    return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);
   }

@@ -1,21 +1,36 @@
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { getAllDepartments } from "@/services/patientApi";
+import { useNavigate} from "react-router-dom";
 import DepartmentCard from "../components/custom/DepartmentCard";
 
-const departments = [
-  { name: "Cardiology", description: "Heart and blood vessel specialists." },
-  { name: "Neurology", description: "Brain, spinal cord, and nerve care." },
-  { name: "Orthopedics", description: "Bone and muscle related treatments." },
-  { name: "Pediatrics", description: "Child healthcare and development." },
-];
+function DepartmentList() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { departments, loading, error } = useSelector((state) => state.patient);
 
-export default function DepartmentList() {
+  useEffect(() => {
+    dispatch(getAllDepartments());
+  }, [dispatch]);
+
+  if (loading) return <p>Loading departments...</p>; 
+  if (error) return <p>{error}</p>;
+
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold text-[#0a1a44] mb-6 text-center">Departments</h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {departments.map((d, i) => (
-          <DepartmentCard key={i} department={d} />
-        ))}
-      </div>
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+      {departments.map((dept) => (
+        <DepartmentCard
+          key={dept._id}
+          name={dept.deptname}
+          description={dept.description}
+          onClick={() =>
+            navigate(`/departments/${dept.deptname}/doctors`)
+          }
+        />
+      ))}
     </div>
   );
 }
+
+export default DepartmentList;
+

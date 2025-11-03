@@ -3,21 +3,23 @@ import {
   registerPatient,
   loginPatient,
   logoutPatient,
-  renewAccessToken,
+  getCurrentPatient
 } from "../../services/patientApi";
+import { isPending, isFulfilled, isRejected } from "@reduxjs/toolkit";
 
 const initialState = {
-  user: null,        
+  user: null,
   loading: false,
   error: null,
   isAuthenticated: false,
+  isInitialized: false,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    
+
     clearAuthState: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -26,6 +28,39 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+
+    builder.addCase(registerPatient.fulfilled, (state, action) => {
+      state.user = action.payload.user || null;
+      state.isAuthenticated = true;
+      state.isInitialized = true;
+    })
+
+
+    builder.addCase(loginPatient.fulfilled, (state, action) => {
+      state.user = action.payload.user || null;
+      state.isAuthenticated = true;
+      state.isInitialized = true;
+    })
+
+
+    builder.addCase(logoutPatient.fulfilled, (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      state.isInitialized = true;
+    })
+
+    builder.addCase(getCurrentPatient.fulfilled, (state, action) => {
+      state.user = action.payload.user;
+      state.isInitialized = true;
+      state.isAuthenticated = true;
+    });
+
+    builder.addCase(getCurrentPatient.rejected, (state, action) => {
+      state.user = null;
+      state.isInitialized = true;
+      state.isAuthenticated = false;
+      state.error = null;
+    });
 
     builder.addMatcher(isPending, (state, action) => {
       state.loading = true;
@@ -39,30 +74,8 @@ const authSlice = createSlice({
     builder.addMatcher(isRejected, (state, action) => {
       state.loading = false;
       state.error = action.payload;
+      state.isAuthenticated = false;
     });
-    builder
-      
-      .addCase(registerPatient.fulfilled, (state, action) => {
-        state.user = action.payload.user || null;
-        state.isAuthenticated = true;
-      })
-
-      
-      .addCase(loginPatient.fulfilled, (state, action) => {
-        state.user = action.payload.user || null;
-        state.isAuthenticated = true;
-      })
-
-      
-      .addCase(logoutPatient.fulfilled, (state) => {
-        state.user = null;
-        state.isAuthenticated = false;
-      })
-
-       
-      .addCase(renewAccessToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken;
-      });
   },
 });
 

@@ -1,13 +1,24 @@
-import { Link } from "react-router-dom";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
-export default function DepartmentCard({ department }) {
+function DepartmentCard({ name, description, onClick }) {
+
   return (
-    <Link
-      to={`/doctors?dept=${encodeURIComponent(department.name)}`}
-      className="block bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100"
+    <Card
+      onClick={onClick}
+      className="cursor-pointer rounded-2xl p-4 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-200 bg-white"
     >
-      <h3 className="text-lg font-semibold text-[#0a1a44]">{department.name}</h3>
-      <p className="text-sm text-gray-500 mt-1">{department.description}</p>
-    </Link>
+      <CardContent className="flex flex-col items-center justify-center gap-3">
+        <h3 className="text-lg font-semibold text-[#0a1a44] capitalize">
+          {name}
+        </h3>
+        <p className="text-gray-600 text-center text-sm">
+          {description || "Explore doctors in this department."}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
+
+export default DepartmentCard;
+
