@@ -76,11 +76,11 @@ const registerdoctor = asyncHandler(async (req, res) => {
             aadhar: aadhar.url,
             medicaldegree: medicaldegree.url,
             medicallicense: medicallicense.url,
-            profilepicture: profilepicture.url
+            profilepicture: profilepicture.url,
         },
         experience,
         qualification,
-        department,
+        department:department.toLowerCase(),
         specialization,
         hospitalname,
         shift: shiftarray
@@ -275,7 +275,7 @@ const updateprofile = asyncHandler(async (req, res) => {
 
 const getdoctorprofiledetails = asyncHandler(async (req, res) => {
     const { doctorid } = req.params
-    const doctor = await Doctor.findById(doctorid).select('-password -refreshtoken -verificationdocument')
+    const doctor = await Doctor.findById(doctorid).select('-password -refreshtoken -verificationdocument.aadhar -verificationdocument.medicaldegree -verificationdocument.medicallicense')
     if (!doctor) {
         throw new apiError(404, "Doctor not found")
     }
@@ -292,7 +292,7 @@ const getdoctorprofiledetailsprivate = asyncHandler(async (req, res) => {
 })
 
 const getalldoctorprofiledetails = asyncHandler(async (req, res) => {
-    const doctors = await Doctor.find().select('doctorname specialization department qualification experience');
+    const doctors = await Doctor.find().select('doctorname specialization department qualification experience verificationdocument.profilepicture');
     return res.status(200)
         .json(new apiResponse(200, doctors, "all profiles fetched succesfully"))
 })
@@ -358,5 +358,14 @@ const updatedocument = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, updateddoctor, "Document updated successfully"))
 })
 
+const getdoctorbydept =asyncHandler(async (req,res)=>{
+    const {deptname} = req.params;
+    const doctors = await Doctor.find({department:deptname,}).select('doctorname specialization department qualification experience verificationdocument.profilepicture');
+    if(!doctors){
+        throw new apiError(404,"No doctors found for the given department") 
+    }
+    return res.status(200)
+    .json (new apiResponse(200,doctors,"Doctors fetched successfully"))
+})
 
-export { registerdoctor, logindoctor, logoutdoctor, accesstokenrenewal, updatepassword, resetForgottenPassword, getdoctorprofiledetails, updateprofile, updateprofilepic, updatedocument, getalldoctorprofiledetails, getdoctorprofiledetailsprivate };
+export { registerdoctor, logindoctor, logoutdoctor, accesstokenrenewal, updatepassword, resetForgottenPassword, getdoctorprofiledetails, updateprofile, updateprofilepic, updatedocument, getalldoctorprofiledetails, getdoctorprofiledetailsprivate ,getdoctorbydept};

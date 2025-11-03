@@ -327,7 +327,7 @@ const appointmentconfirmation = (otpCode,patientName,doctorName,department,appoi
       <div class="section">
         <p><strong>Appointment Details:</strong></p>
         <p>Date: <span class="highlight">${appointmentDate}</span></p>
-        <p>Time: <span class="highlight">${appointmentTime}}</span></p>
+        <p>Time: <span class="highlight">${appointmentTime}</span></p>
         <p>Department: <span class="highlight">${department}</span></p>
         <p>Hospital: <span class="highlight">NovaMed Hospital</span></p>
       </div>

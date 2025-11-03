@@ -109,7 +109,7 @@ const loginPatient = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: false,
     }
     return res
         .status(200)
@@ -141,7 +141,7 @@ const logoutPatient = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
     }
 
     return res
@@ -173,7 +173,8 @@ const accesstokenrenewal = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+
     }
     return res
         .status(200)
@@ -285,4 +286,7 @@ const updateprofilepic = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, updatedpatient, "profilepicture updated successfully"))
 })
 
-export { registerPatient, loginPatient, logoutPatient, accesstokenrenewal, updatepassword, resetForgottenPassword, updateprofile, getprofiledetails, updateprofilepic };
+const getPatient= asyncHandler(async (req,res) => {
+    return res.status(200).json(new apiResponse(200, req.patient, "Patient fetched successfully"));
+});
+export { registerPatient, loginPatient, logoutPatient, accesstokenrenewal, updatepassword, resetForgottenPassword, updateprofile, getprofiledetails, updateprofilepic,getPatient };

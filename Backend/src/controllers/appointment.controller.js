@@ -9,85 +9,105 @@ import { appointmentcancellation, appointmentconfirmation, appointmentupdation }
 import { emitAppointmentCancelled, emitAppointmentCreated, emitAppointmentUpdated } from "../utils/socketEmitter.js";
 import { notifyUsers } from "../utils/notification.js";
 
-const parseTime = () => {
-    const [h, m] = timeStr.split(":").map(Number);
-    const date = new Date();
-    date.setHours(h, m, 0, 0);
-    return date;
+const parseTime = (timeStr) => {
+  const [h, m] = timeStr.split(":").map(Number);
+  const date = new Date();
+  date.setHours(h, m, 0, 0);
+  return date;
+};
 
-}
-const formatTime = () => {
-    return date.toTimeString().slice(0, 5);
-}
+const formatTime = (date) => {
+  return date.toTimeString().slice(0, 5);
+};
+
 const checkavailability = asyncHandler(async (req, res) => {
-    const { doctorusername, month, year } = req.query;
+  const { doctorid, month, year } = req.query;
+  if (!doctorid) throw new apiError(400, "Doctor ID missing");
 
-    if (!doctorusername || !month || !year) {
-        throw new apiError(400, "Some parameters are missing")
-    }
-    const doctor = await Doctor.findOne({ doctorusername: doctorUsername });
-    if (!doctor) {
-        throw new apiError(404, "Doctor not found")
-    }
+  const doctor = await Doctor.findById(doctorid);
+  if (!doctor) throw new apiError(404, "Doctor not found");
 
-    const shiftSchedule = doctor.shift;
-    const totalDaysInMonth = new Date(year, month, 0).getDate();
+  const finalDoctorUsername = doctor.doctorusername;
+  const finalMonth = Number(month);
+  const finalYear = Number(year);
 
-    const bookedAppointments = await Appointment.find({
-        "doctordetails.doctorusername": doctorusername,
-        appointmentdate: {
-            $gte: new Date(year, month - 1, 1),
-            $lte: new Date(year, month - 1, totalDaysInMonth),
-        },
-        status: { $in: ["Pending", "Confirmed"] }
+  if (!finalMonth || !finalYear)
+    throw new apiError(400, "Month or Year missing");
+
+  const shiftSchedule = doctor.shift;
+  const totalDaysInMonth = new Date(finalYear, finalMonth, 0).getDate();
+
+  // ✅ Use start & end of month in UTC to avoid timezone offset
+  const monthStart = new Date(Date.UTC(finalYear, finalMonth - 1, 1, 0, 0, 0));
+  const monthEnd = new Date(Date.UTC(finalYear, finalMonth - 1, totalDaysInMonth, 23, 59, 59));
+
+  const bookedAppointments = await Appointment.find({
+    "doctordetails.doctorusername": finalDoctorUsername,
+    appointmentdate: {
+      $gte: monthStart,
+      $lte: monthEnd,
+    },
+    status: { $in: ["Pending", "Confirmed"] },
+  });
+
+  const dateSlotMap = {};
+
+  for (let day = 1; day <= totalDaysInMonth; day++) {
+    const localDate = new Date(Date.UTC(finalYear, finalMonth - 1, day));
+    const weekday = localDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      timeZone: "UTC",
     });
 
-    const dateSlotMap = {};
+    const applicableShifts = shiftSchedule.filter((s) => s.day === weekday);
+    if (applicableShifts.length === 0) continue;
 
-    for (let day = 1; day <= totalDaysInMonth; day++) {
-        const currentDate = new Date(year, month - 1, day);
-        const weekday = currentDate.toLocaleDateString("en-US", { weekday: "long" });
+    const dateStr = localDate.toISOString().split("T")[0];
+    dateSlotMap[dateStr] = { totaltimes: [] };
 
-        const applicableShifts = shiftSchedule.filter(
-            (s) => s.day === weekday
-        );
+    for (const shift of applicableShifts) {
+      const shiftStart = parseTime(shift.starttime);
+      const shiftEnd = parseTime(shift.endtime);
+      const slotInterval = (shiftEnd - shiftStart) / shift.patientslot;
 
-        if (applicableShifts.length === 0) continue;
-
-        const dateStr = currentDate.toISOString().split("T")[0];
-        dateSlotMap[dateStr] = {
-            totaltimes: [],
-        };
-
-        for (const shift of applicableShifts) {
-            const shiftStart = parseTime(shift.starttime);
-            const shiftEnd = parseTime(shift.endtime);
-
-            const slotInterval = (shiftEnd - shiftStart) / shift.patientslot;
-
-            for (let i = 0; i < shift.patientslot; i++) {
-                const slotTime = new Date(shiftStart + i * slotInterval);
-                const slotStr = formatTime(slotTime);
-                dateSlotMap[dateStr].totaltimes.push(slotStr)
-            }
-        }
+      for (let i = 0; i < shift.patientslot; i++) {
+        const slotTime = new Date(shiftStart.getTime() + i * slotInterval);
+        const slotStr = formatTime(slotTime);
+        dateSlotMap[dateStr].totaltimes.push(slotStr);
+      }
     }
-    for (const appt of bookedAppointments) {
-        const apptDate = new Date(appt.appointmentdate).toISOString().split("T")[0];
-        if (dateSlotMap[apptDate]) {
-            dateSlotMap[apptDate].bookedTimes.pop(appt.appointmenttime);
-        }
+  }
+
+  // Remove already booked slots
+  for (const appt of bookedAppointments) {
+    const apptDate = new Date(appt.appointmentdate).toISOString().split("T")[0];
+    if (dateSlotMap[apptDate]) {
+      const idx = dateSlotMap[apptDate].totaltimes.indexOf(appt.appointmenttime);
+      if (idx !== -1) dateSlotMap[apptDate].totaltimes.splice(idx, 1);
     }
-    const availabilityArray = Object.entries(dateSlotMap).map(
-        ([date, { bookedTimes }]) => ({
-            date,
-            availableSlots: bookedTimes.length,
-            isAvailable: bookedTimes.length !== 0,
-        })
+  }
+
+  const availabilityArray = Object.entries(dateSlotMap).map(
+    ([date, { totaltimes }]) => ({
+      date,
+      availableSlots: totaltimes.length,
+      isAvailable: totaltimes.length > 0,
+      availableTimes: totaltimes,
+    })
+  );
+
+  return res
+    .status(200)
+    .json(
+      new apiResponse(
+        200,
+        availabilityArray,
+        "Available slots fetched successfully"
+      )
     );
-
-    return res.status(200).json(new apiResponse(200, availabilityArray, "Available slots are fetched successfully "));
 });
+
+
 
 
 const createAppointment = asyncHandler(async (req, res) => {
@@ -102,7 +122,7 @@ const createAppointment = asyncHandler(async (req, res) => {
         throw new apiError(401, "Unauthorized patient request");
     }
     const { doctorid } = req.params
-    const doctor = await Doctor.findById(doctorid).select("doctorusername doctorname specialization department qualification experience")
+    const doctor = await Doctor.findById(doctorid).select("doctorusername doctorname specialization department qualification")
     if (!doctor) {
         throw new apiError(404, "You are requesting to a non existing Doctor")
     }
@@ -113,12 +133,21 @@ const createAppointment = asyncHandler(async (req, res) => {
         sex: req.patient?.sex,
         phonenumber: req.patient?.phonenumber
     }
+    const doctordetails = {
+        _id: doctor._id,
+        doctorname: doctor.doctorname,
+        doctorusername: doctor.doctorusername,
+        specialization: doctor.specialization,
+        department: doctor.department,
+        qualification: doctor.qualification
+    }
     let medicalhistory
     if (req.body.medicalhistory) {
         medicalhistory = req.body.medicalhistory
     }
+    const appointmentdateObj = new Date(appointmentdate)
     const existedappointment = await Appointment.findOne({
-        $and: [{ appointmenttime }, { appointmentdate }, { doctordetails: doctor }]
+        $and: [{ appointmenttime }, { appointmentdate: appointmentdateObj }, { "doctordetails.doctorusername": doctordetails.doctorusername }]
     })
 
     if (existedappointment) {
@@ -127,7 +156,7 @@ const createAppointment = asyncHandler(async (req, res) => {
     const uniquecode = generateOtp()
     const createdappointment = await Appointment.create({
         patientdetails: patient,
-        doctordetails: doctor,
+        doctordetails: doctordetails,
         appointmentdate,
         appointmenttime,
         symptoms,
@@ -174,16 +203,8 @@ const createAppointment = asyncHandler(async (req, res) => {
 
 const cancelappointment = asyncHandler(async (req, res) => {
     const { appointmentid } = req.params
-    const { password } = req.body
-    if (!password) {
-        throw new apiError(400, "Password is required")
-    }
     if (!req.patient) {
         throw new apiError(401, "Unauthorized patient request");
-    }
-    const ispasswordvalid = await req.patient.ispasswordcorrect(password)
-    if (!ispasswordvalid) {
-        throw new apiError(400, "Password is invalid")
     }
     const cancelledappointment = await Appointment.findByIdAndUpdate(
         appointmentid,
@@ -193,7 +214,7 @@ const cancelappointment = asyncHandler(async (req, res) => {
             }
         },
         { new: true }
-    ).select("appointmenttime appointmentdate doctordetails")
+    ).select("appointmenttime appointmentdate doctordetails patientdetails status")
 
     const doctorname = cancelledappointment.doctordetails.doctorname
     const patientname = cancelledappointment.patientdetails.patientname
@@ -230,49 +251,60 @@ const cancelappointment = asyncHandler(async (req, res) => {
         html: appointmentcancellation(patientname, doctorname, cancelledappointment.appointmentdate, cancelledappointment.appointmenttime)
     })
 
-    return res.status(200).json(new apiResponse(200, {
-        appointmentId: cancelledappointment._id,
-        doctorname,
-        appointmenttime: cancelledappointment.appointmenttime,
-        appointmentdate: cancelledappointment.appointmentdate,
-    }, "the appointment is cancelled successfully"))
+    return res.status(200).json(new apiResponse(200, cancelledappointment, "the appointment is cancelled successfully"))
 })
 
 const updateappointment = asyncHandler(async (req, res) => {
-    const { appointmenttime, appointmentdate, doctorid } = req.body
-    const { appointmentid } = req.params
+    const { appointmenttime, appointmentdate, symptoms } = req.body;
+    const { appointmentid } = req.params;
+    let medicalhistory;
+    
+    if (req.body.medicalhistory) {
+        medicalhistory = req.body.medicalhistory;
+    }
+    
     if (!req.patient) {
         throw new apiError(401, "Unauthorized patient request");
     }
-    const doctor = await Doctor.findById(doctorid).select(" doctorusername doctorname specialization department qualification experience")
-    if (!doctor) {
-        throw new apiError(404, "Doctor not found")
+    const currentAppointment = await Appointment.findById(appointmentid);
+    if (!currentAppointment) {
+        throw new apiError(404, "Appointment not found");
     }
+
     const existedappointment = await Appointment.findOne({
-        $and: [{ appointmenttime }, { appointmentdate }, { doctordetails: doctor }]
-    })
+        _id: { $ne: appointmentid },
+        appointmenttime,
+        appointmentdate: new Date(appointmentdate),
+        "doctordetails.doctorusername": currentAppointment.doctordetails.doctorusername, 
+        status: { $in: ["Pending", "Confirmed"] } 
+    });
+
     if (existedappointment) {
-        throw new apiError(400, "The slot is already booked")
+        throw new apiError(400, "The slot is already booked");
     }
+
     const updatedappointment = await Appointment.findByIdAndUpdate(
         appointmentid,
         {
             $set: {
                 appointmenttime,
-                appointmentdate,
-                doctordetails
+                appointmentdate: new Date(appointmentdate), 
+                symptoms,
+                medicalhistory: medicalhistory || "None"
             }
         },
         { new: true }
-    )
+    );
+
     if (!updatedappointment) {
-        throw new apiError(400, "The appointment update failed")
+        throw new apiError(400, "The appointment update failed");
     }
-    const doctorName = updatedappointment.doctordetails.doctorname
-    const doctorUsername = updatedappointment.doctordetails.doctorusername
-    const appointmentDate = updatedappointment.appointmentdate
-    const appointmentTime = updatedappointment.appointmenttime
-    const appointmentId = updatedappointment._id
+
+    const doctorName = updatedappointment.doctordetails.doctorname;
+    const doctorUsername = updatedappointment.doctordetails.doctorusername;
+    const appointmentDate = updatedappointment.appointmentdate;
+    const appointmentTime = updatedappointment.appointmenttime;
+    const appointmentId = updatedappointment._id;
 
     emitAppointmentUpdated(global.io, {
         appointmentId,
@@ -280,30 +312,32 @@ const updateappointment = asyncHandler(async (req, res) => {
         patientUsername: req.patient?.patientusername,
         appointmentDate,
         appointmentTime
-    })
+    });
 
     notifyUsers(global.io, {
         patientUsername: req.patient?.patientusername,
         messageForPatient: {
             type: "appointment",
             action: "updated",
-            message: `Your appointment has been updated. New updated slot- ${appointmentDate} at ${appointmentDate}`
+            message: `Your appointment has been updated. New slot: ${appointmentDate.toLocaleDateString()} at ${appointmentTime}` 
         },
         notifyAdmin: true,
         messageForAdmin: {
             type: "appointment",
             action: "updated",
-            message: `patinet-${req.patient?.patientusername} updated their appointment.New booking slot is - ${appointmentDate} at ${appointmentTime}`
+            message: `Patient ${req.patient?.patientusername} updated their appointment. New slot: ${appointmentDate.toLocaleDateString()} at ${appointmentTime}` 
         }
-    })
+    });
+
     await sendMail({
         to: req.patient?.email,
-        subject: "your appointment has been updated",
+        subject: "Your appointment has been updated",
         html: appointmentupdation(req.patient?.patientname, doctorName, appointmentDate, appointmentTime)
-    })
+    });
+
     return res.status(200)
-        .json(new apiResponse(200, updatedappointment, "Appointment updated successfully"))
-})
+        .json(new apiResponse(200, updatedappointment, "Appointment updated successfully"));
+});
 
 const getappointment = asyncHandler(async (req, res) => {
     const { appointmentid } = req.params
@@ -323,7 +357,7 @@ const getallappointmentforpatient = asyncHandler(async (req, res) => {
         throw new apiError(401, "Unauthorized patient request");
     }
     const patientusername = req.patient?.patientusername
-    const appointments = await Appointment.find("patientdetails.patientusername" === patientusername).select("doctordetails appointmenttime appointmentdate")
+    const appointments = await Appointment.find({"patientdetails.patientusername":patientusername}).select("doctordetails appointmenttime appointmentdate status")
 
     return res.status(200).json(new apiResponse(200, appointments, "All appointments fetched successfully"))
 })
@@ -332,7 +366,7 @@ const getallappointmentfordoctor = asyncHandler(async (req, res) => {
         throw new apiError(401, "Unauthorized doctor request");
     }
     const doctorusername = req.doctor?.doctorusername
-    const appointments = await Appointment.find("doctordetails.doctorusername" === doctorusername).select("patientdetails appointmenttime appointmentdate")
+    const appointments = await Appointment.find({"doctordetails.doctorusername": doctorusername}).select("patientdetails appointmenttime appointmentdate status")
 
     return res.status(200).json(new apiResponse(200, appointments, "All appointments fetched successfully"))
 })
@@ -340,7 +374,7 @@ const getallappointmentforadmin = asyncHandler(async (req, res) => {
     if (!req.admin) {
         throw new apiError(401, "Unauthorized admin request");
     }
-    const appointments = await Appointment.find().select("patientdetails doctordetails appointmenttime appointmentdate")
+    const appointments = await Appointment.find().select("patientdetails doctordetails appointmenttime appointmentdate status")
 
     return res.status(200).json(new apiResponse(200, appointments, "All appointments fetched successfully"))
 })

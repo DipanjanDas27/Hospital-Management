@@ -8,7 +8,8 @@ import {
     resetForgottenPassword,
     accesstokenrenewal,
     getprofiledetails,
-    updateprofilepic
+    updateprofilepic,
+    getPatient
 } from '../controllers/patient.controller.js';
 import {
     sendotp,
@@ -19,7 +20,8 @@ import {
 import { verifypatient } from "../middlewares/patientauth.middleware.js"
 import { upload } from '../middlewares/multer.middleware.js';
 import { verifyTempjwt } from '../middlewares/verifytempjwt.middleware.js';
-import { getalldoctorprofiledetails, getdoctorprofiledetails } from '../controllers/doctor.controller.js';
+import { getalldoctorprofiledetails, getdoctorbydept, getdoctorprofiledetails } from '../controllers/doctor.controller.js';
+import { getAllDepartments } from '../controllers/department.controller.js';
 
 const router = Router();
 
@@ -29,6 +31,7 @@ router.route("/logout").post(verifypatient, logoutPatient);
 router.route("/update-profile").patch(verifypatient, updateprofile);
 router.route("/update-profilepicture").patch(verifypatient, upload.single("profilepicture"), updateprofilepic);
 router.route("/get-profile").get(verifypatient, getprofiledetails);
+router.route("/get-patient").get(verifypatient, getPatient);
 router.route("/renew-access-token").post(accesstokenrenewal);
 
 router.route("/update-password/send-otp").post(verifypatient, sendotp);
@@ -41,9 +44,7 @@ router.route("/forgot-password/update-password").patch(verifyTempjwt, resetForgo
 
 router.route("/doctors/:doctorid").get(verifypatient, getdoctorprofiledetails);
 router.route("/doctors").get(verifypatient, getalldoctorprofiledetails);
-
-
-
-
+router.route("/departments").get(verifypatient,getAllDepartments);
+router.route("/departments/:deptname/doctors").get(verifypatient,getdoctorbydept); 
 
 export default router;

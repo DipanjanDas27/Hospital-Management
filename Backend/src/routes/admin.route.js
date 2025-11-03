@@ -6,6 +6,7 @@ import { verifyTempjwt } from "../middlewares/verifytempjwt.middleware.js";
 import { sendotp, sendForgetPasswordOtp, verifyotp, verifyForgotPasswordOtp } from "../controllers/otp.controller.js";
 import { getallappointmentforadmin } from "../controllers/appointment.controller.js";
 import { getalldoctorprofiledetails, getdoctorprofiledetails } from "../controllers/doctor.controller.js";
+import { createDepartment, getAllDepartments, updateDepartment } from "../controllers/department.controller.js";
 const router = Router();
 
 router.route('/register').post(
@@ -49,6 +50,10 @@ router.route("/forgot-password/update-password").patch(verifyTempjwt, resetForgo
 router.route("/appointments").get(verifyadmin, getallappointmentforadmin);
 router.route("/doctors").get(verifyadmin, getalldoctorprofiledetails);
 router.route("/doctors/:doctorid").get(verifyadmin, getdoctorprofiledetails);
+
+router.route("/create-department").post(verifyadmin,createDepartment);
+router.route("/departments").get(verifyadmin,getAllDepartments);
+router.route("/update-department/:id").patch(verifyadmin,updateDepartment);
 
 
 export default router;
