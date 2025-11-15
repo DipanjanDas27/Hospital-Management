@@ -7,6 +7,8 @@ import { sendotp, sendForgetPasswordOtp, verifyotp, verifyForgotPasswordOtp } fr
 import { getallappointmentforadmin } from "../controllers/appointment.controller.js";
 import { getalldoctorprofiledetails, getdoctorprofiledetails } from "../controllers/doctor.controller.js";
 import { createDepartment, getAllDepartments, updateDepartment } from "../controllers/department.controller.js";
+import { getprescription, getallprescriptions } from "../controllers/prescription.contorller.js";
+import { getlabtest, getalllabtests } from "../controllers/labtest.controller.js";
 const router = Router();
 
 router.route('/register').post(
@@ -55,5 +57,12 @@ router.route("/create-department").post(verifyadmin,createDepartment);
 router.route("/departments").get(verifyadmin,getAllDepartments);
 router.route("/update-department/:id").patch(verifyadmin,updateDepartment);
 
+// Prescription routes - Read only access for admin
+router.route("/prescriptions").get(verifyadmin, getallprescriptions);
+router.route("/prescriptions/:prescriptionid").get(verifyadmin, getprescription);
+
+// Labtest routes - Read only access for admin
+router.route("/labtests").get(verifyadmin, getalllabtests);
+router.route("/labtests/:labtestid").get(verifyadmin, getlabtest);
 
 export default router;

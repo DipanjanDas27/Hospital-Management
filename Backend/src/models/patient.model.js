@@ -46,7 +46,6 @@ const patientSchema = new Schema({
     guardianName: {
         type: String,
         trim: true,
-        required:true,
     },
     refreshtoken:{
         type:String,

@@ -1,45 +1,11 @@
 import express from "express"
 import http from "http"
-import { Server } from "socket.io"
 import cors from "cors"
 import cookieparser from "cookie-parser"
 import { apiError } from "./utils/apiError.js"
 
 
 const app = express()
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
-});
-global.io = io
-
-io.on('connection', (socket) => {
-  console.log('New client connected:', socket.id);
-
-  socket.on('join', ({ username, role }) => {
-    if (!username || !role) return;
-
-    if (role === 'admin') {
-      socket.join(`admin`);
-    } else if (role === 'doctor') {
-      socket.join(`doctor:${username}`);
-    } else if (role === 'patient') {
-      socket.join(`patient:${username}`);
-    }
-    console.log(`${role} ${username} joined their room`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
-
-
-
-
 
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }))
 app.use(cookieparser())

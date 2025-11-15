@@ -29,6 +29,31 @@ const sendotp = asyncHandler(async (req, res) => {
     return res.status(200)
         .json(new apiResponse(200, {}, "OTP sent successfully"));
 })
+
+const verifyotp = asyncHandler(async (req, res) => {
+    const { otp } = req.body;
+    const email = req.patient?.email || req.doctor?.email || req.admin?.email;
+    if (!email) {
+        throw new apiError(400, "Email is not found from any user or user is not logged in");
+    }
+    if (!otp) {
+        throw new apiError(400, " OTP is required");
+    }
+    
+    const storedotp = getOTP(email);
+    if (!storedotp) {
+        throw new apiError(404, "OTP not found or expired");
+    }
+    
+    if (storedotp !== otp) {
+        throw new apiError(401, "Invalid OTP");
+    }
+    
+    clearOTP(email);
+    return res.status(200)
+    .json(new apiResponse(200, {}, "OTP verified successfully"));
+    
+});
 const sendForgetPasswordOtp = asyncHandler(async (req, res) => {
     const { email } = req.body;
     if (!email) {
@@ -71,33 +96,8 @@ const sendForgetPasswordOtp = asyncHandler(async (req, res) => {
         secure: true
     }
     return res.status(200).cookie("tempToken", tempToken, options)
-        .json(new apiResponse(200, { tempToken }, "OTP sent successfully"));
+        .json(new apiResponse(200,  tempToken, "OTP sent successfully"));
 })
-
-const verifyotp = asyncHandler(async (req, res) => {
-    const { otp } = req.body;
-    const email = req.patient?.email || req.doctor?.email || req.admin?.email;
-    if (!email) {
-        throw new apiError(400, "Email is not found from any user or user is not logged in");
-    }
-    if (!otp) {
-        throw new apiError(400, " OTP is required");
-    }
-
-    const storedotp = getOTP(email);
-    if (!storedotp) {
-        throw new apiError(404, "OTP not found or expired");
-    }
-
-    if (storedotp !== otp) {
-        throw new apiError(401, "Invalid OTP");
-    }
-
-    clearOTP(email);
-    return res.status(200)
-        .json(new apiResponse(200, {}, "OTP verified successfully"));
-
-});
 const verifyForgotPasswordOtp = asyncHandler(async (req, res) => {
     const { otp } = req.body;
     if (!otp) throw new apiError(400, " OTP is required");

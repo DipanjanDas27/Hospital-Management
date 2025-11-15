@@ -80,7 +80,7 @@ const registerdoctor = asyncHandler(async (req, res) => {
         },
         experience,
         qualification,
-        department:department.toLowerCase(),
+        department: department.toLowerCase(),
         specialization,
         hospitalname,
         shift: shiftarray
@@ -292,10 +292,20 @@ const getdoctorprofiledetailsprivate = asyncHandler(async (req, res) => {
 })
 
 const getalldoctorprofiledetails = asyncHandler(async (req, res) => {
-    const doctors = await Doctor.find().select('doctorname specialization department qualification experience verificationdocument.profilepicture');
-    return res.status(200)
-        .json(new apiResponse(200, doctors, "all profiles fetched succesfully"))
-})
+    const search = req.query.search?.trim() || "";
+
+    const query = search
+        ? { doctorname: { $regex: search, $options: "i" } }
+        : {};
+
+    const doctors = await Doctor.find(query).select(
+        "doctorname specialization department qualification experience verificationdocument.profilepicture"
+    );
+
+    return res
+        .status(200)
+        .json(new apiResponse(200, doctors, "Doctor profiles fetched successfully"));
+});
 
 const updateprofilepic = asyncHandler(async (req, res) => {
     const profilepicturelocalpath = req.file?.path
@@ -358,14 +368,20 @@ const updatedocument = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, updateddoctor, "Document updated successfully"))
 })
 
-const getdoctorbydept =asyncHandler(async (req,res)=>{
-    const {deptname} = req.params;
-    const doctors = await Doctor.find({department:deptname,}).select('doctorname specialization department qualification experience verificationdocument.profilepicture');
-    if(!doctors){
-        throw new apiError(404,"No doctors found for the given department") 
+const getdoctorbydept = asyncHandler(async (req, res) => {
+    const { deptname } = req.params;
+    const doctors = await Doctor.find({ department: deptname, }).select('doctorname specialization department qualification experience verificationdocument.profilepicture');
+    if (!doctors) {
+        throw new apiError(404, "No doctors found for the given department")
     }
     return res.status(200)
-    .json (new apiResponse(200,doctors,"Doctors fetched successfully"))
+        .json(new apiResponse(200, doctors, "Doctors fetched successfully"))
 })
-
-export { registerdoctor, logindoctor, logoutdoctor, accesstokenrenewal, updatepassword, resetForgottenPassword, getdoctorprofiledetails, updateprofile, updateprofilepic, updatedocument, getalldoctorprofiledetails, getdoctorprofiledetailsprivate ,getdoctorbydept};
+const getCurrentDoctor = asyncHandler(async (req, res) => {
+    const doctor = await Doctor.findById(req.doctor?._id).select("-password -refreshtoken");
+    if (!doctor) {
+        throw new apiError(404, "Doctor not found");
+    }
+    return res.status(200).json(new apiResponse(200, doctor, "Current doctor fetched successfully"));
+});
+export { registerdoctor, logindoctor, logoutdoctor, accesstokenrenewal, updatepassword, resetForgottenPassword, getdoctorprofiledetails, updateprofile, updateprofilepic, updatedocument, getalldoctorprofiledetails, getdoctorprofiledetailsprivate, getdoctorbydept,getCurrentDoctor }; 

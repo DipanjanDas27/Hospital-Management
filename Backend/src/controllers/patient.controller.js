@@ -24,7 +24,7 @@ const generateaccesstokenandrefreshtoken = async (patientId) => {
         patient.refreshtoken = refreshtoken;
         await patient.save({ validateBeforeSave: false });
 
-        return { accesstoken, refreshtoken };
+        return { accesstoken, newrefreshtoken:refreshtoken };
 
     } catch (error) {
         console.error("Token generation failed:", error);
@@ -33,10 +33,10 @@ const generateaccesstokenandrefreshtoken = async (patientId) => {
 };
 
 const registerPatient = asyncHandler(async (req, res) => {
-    const { patientname, patientusername, email, password, phonenumber, age, sex, guardianName } = req.body
+    const { patientname, patientusername, email, password, phonenumber, age, sex } = req.body
 
     if (
-        [patientname, patientusername, email, phonenumber, age, sex, password, guardianName].some((field) => !field || field?.trim() === "")
+        [patientname, patientusername, email, phonenumber, age, sex, password ].some((field) => !field || field?.trim() === "")
     ) {
         throw new apiError(400, "All fields are required")
     }
@@ -47,6 +47,10 @@ const registerPatient = asyncHandler(async (req, res) => {
         throw new apiError(409, "patient with same email or username already exist")
     }
     let profilepicture;
+    let guardianName;
+    if(req.body.guardianName){
+        guardianName = req.body.guardianName;
+    }
 
     if (req.file?.path) {
         const profilepicturelocalpath = req.file.path;
@@ -60,7 +64,7 @@ const registerPatient = asyncHandler(async (req, res) => {
         phonenumber,
         age,
         sex,
-        guardianName,
+        guardianName: guardianName || "",
         profilepicture: profilepicture?.url || ""
     })
 
@@ -98,7 +102,7 @@ const loginPatient = asyncHandler(async (req, res) => {
     if (!ispassword) {
         throw new apiError(401, "Invalid password")
     }
-    const { accesstoken, refreshtoken } = await generateaccesstokenandrefreshtoken(existedpatient._id)
+    const { accesstoken, newrefreshtoken } = await generateaccesstokenandrefreshtoken(existedpatient._id)
     const loggedinpatient = await Patient.findById(existedpatient._id).select("-password -refreshtoken")
 
     await sendMail({
@@ -114,12 +118,12 @@ const loginPatient = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .cookie("accesstoken", accesstoken, options)
-        .cookie("refreshtoken", refreshtoken, options)
+        .cookie("refreshtoken",newrefreshtoken, options)
         .json(
             new apiResponse(
                 200,
                 {
-                    user: loggedinpatient, accesstoken, refreshtoken
+                    user: loggedinpatient, accesstoken, refreshtoken:newrefreshtoken
                 },
                 "User logged In Successfully"
             )
@@ -152,7 +156,7 @@ const logoutPatient = asyncHandler(async (req, res) => {
 })
 
 const accesstokenrenewal = asyncHandler(async (req, res) => {
-    const { refreshtoken } = req.cookies || req.body;
+    const { refreshtoken } = req.cookies ;
 
     if (!refreshtoken) {
         throw new apiError(401, "Unauthorized request");
@@ -261,6 +265,7 @@ const getprofiledetails = asyncHandler(async (req, res) => {
 
 const updateprofilepic = asyncHandler(async (req, res) => {
     const profilepicturelocalpath = req.file?.path
+    console.log(req.file)
     if (!profilepicturelocalpath) {
         throw new apiError(400, "profilepicture not found ")
     }
@@ -287,6 +292,11 @@ const updateprofilepic = asyncHandler(async (req, res) => {
 })
 
 const getPatient= asyncHandler(async (req,res) => {
-    return res.status(200).json(new apiResponse(200, req.patient, "Patient fetched successfully"));
+     const patient = await Patient.findById(req.patient?._id).select("-password -refreshtoken");
+        if (!patient) {
+            throw new apiError(404, "patient not found");
+        }
+        return res.status(200).json(new apiResponse(200, patient, "Current patient fetched successfully"));
+    
 });
 export { registerPatient, loginPatient, logoutPatient, accesstokenrenewal, updatepassword, resetForgottenPassword, updateprofile, getprofiledetails, updateprofilepic,getPatient };

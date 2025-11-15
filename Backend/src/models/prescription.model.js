@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-const medicineSchema = new Schema({
-    name: {
+const medicineSchema = new mongoose.Schema({
+    medicinename: {
         type: String,
         required: true,
     },
@@ -18,7 +18,12 @@ const medicineSchema = new Schema({
     },
 
 })
-const prescriptionSchema = new Schema({
+const prescriptionSchema = new mongoose.Schema({
+    appointmentid: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Appointment",
+        required: true,
+    },
     doctordetails: {
         type: mongoose.Schema.Types.Mixed,
         required: true,
@@ -36,7 +41,8 @@ const prescriptionSchema = new Schema({
         required: true,
     },
     labtest: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Labtest",
     },
 
 }, {timestamps: true,})
