@@ -32,9 +32,9 @@ export const createAppointment = createAsyncThunk("appointment/createAppointment
 });
 
 
-export const cancelAppointment = createAsyncThunk("appointment/cancelAppointment", async (appointmentId, { rejectWithValue }) => {
+export const cancelAppointment = createAsyncThunk("appointment/cancelAppointment", async (appointmentid, { rejectWithValue }) => {
   try {
-    const res = await api.post(`/appointments/cancelAppointment/${appointmentId}`);
+    const res = await api.post(`/appointments/cancelAppointment/${appointmentid}`);
     return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);

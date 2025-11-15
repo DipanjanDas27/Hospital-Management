@@ -116,9 +116,9 @@ export const resetForgottenPassword = createAsyncThunk("patient/resetForgottenPa
 });
 
 
-export const getAllDoctors = createAsyncThunk("patient/getAllDoctors", async (_, { rejectWithValue }) => {
+export const getAllDoctors = createAsyncThunk("patient/getAllDoctors", async (search = "", { rejectWithValue }) => {
   try {
-    const res = await api.get("/doctors");
+    const res = await api.get(`/doctors${search ? `?search=${search}` : ""}`);
     return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data || err.message);

@@ -30,14 +30,14 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
 
     builder.addCase(registerPatient.fulfilled, (state, action) => {
-      state.user = action.payload.user || null;
+      state.user = action.payload || null;
       state.isAuthenticated = true;
       state.isInitialized = true;
     })
 
 
     builder.addCase(loginPatient.fulfilled, (state, action) => {
-      state.user = action.payload.user || null;
+      state.user = action.payload || null;
       state.isAuthenticated = true;
       state.isInitialized = true;
     })
@@ -50,7 +50,7 @@ const authSlice = createSlice({
     })
 
     builder.addCase(getCurrentPatient.fulfilled, (state, action) => {
-      state.user = action.payload.user;
+      state.user = action.payload;
       state.isInitialized = true;
       state.isAuthenticated = true;
     });
@@ -74,7 +74,7 @@ const authSlice = createSlice({
     builder.addMatcher(isRejected, (state, action) => {
       state.loading = false;
       state.error = action.payload;
-      state.isAuthenticated = false;
+      
     });
   },
 });

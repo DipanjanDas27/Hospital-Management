@@ -43,7 +43,7 @@ const patientSlice = createSlice({
 
     builder.addCase(updateProfilePic.fulfilled, (state, action) => {
       if (state.profile) {
-        state.profile.profilePic = action.payload.profilePic;
+        state.profile.profilepicture = action.payload.profilepicture;
       }
     });
 

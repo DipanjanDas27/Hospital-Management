@@ -16,6 +16,16 @@ import DoctorProfile from './pages/doctorProfile'
 import AllAppointments from './pages/AllAppointments'
 import AppointmentDetails from './pages/AppointmentDetails'
 import UpdateAppointment from './pages/UpdateAppointment'
+import Register from './pages/register'
+import UpdateProfile from './pages/UpdateProfile'
+import PatientProfile from './pages/patientprofile'
+import VerifyOtp from './pages/VerifyOtp'
+import ResetPassword from './pages/ResetPassword'
+import SendOtp from './pages/SendOtp'
+import AllPrescriptions from './pages/AllPrescriptions'
+import PrescriptionDetails from './pages/PrescriptionDetails'
+import AllLabTests from './pages/AllLabTests'
+import LabTestDetails from './pages/LabTestDetails'
 
 const router = createBrowserRouter([
   {
@@ -78,7 +88,7 @@ const router = createBrowserRouter([
         path: '/appointments/updateAppointment/:appointmentid',
         element: (
           <AuthLayout authentication={true}>
-           <UpdateAppointment/>
+            <UpdateAppointment />
           </AuthLayout>
         )
       },
@@ -86,7 +96,7 @@ const router = createBrowserRouter([
         path: '/appointments/:appointmentid',
         element: (
           <AuthLayout authentication={true}>
-           <AppointmentDetails />
+            <AppointmentDetails />
           </AuthLayout>
         )
       },
@@ -94,15 +104,84 @@ const router = createBrowserRouter([
         path: '/appointments',
         element: (
           <AuthLayout authentication={true}>
-          <AllAppointments />
+            <AllAppointments />
           </AuthLayout>
         )
       },
       {
+        path: '/profile/updateprofile',
+        element: (
+          <AuthLayout authentication={true}>
+            <UpdateProfile />
+          </AuthLayout>
+        )
+      },
+      {
+        path: '/profile',
+        element: (
+          <AuthLayout authentication={true}>
+            <PatientProfile />
+          </AuthLayout>
+        )
+      },
+      {
+        path: '/prescriptions',
+        element: (
+          <AuthLayout authentication={true}>
+            <AllPrescriptions />
+          </AuthLayout>
+        )
+      },
+      {
+        path: '/prescriptions/:prescriptionid',
+        element: (
+          <AuthLayout authentication={true}>
+            <PrescriptionDetails />
+          </AuthLayout>
+        )
+      },
+      {
+        path: '/labtests',
+        element: (
+          <AuthLayout authentication={true}>
+            <AllLabTests />
+          </AuthLayout>
+        )
+      },
+      {
+        path: '/labtests/:labtestid',
+        element: (
+          <AuthLayout authentication={true}>
+            <LabTestDetails />
+          </AuthLayout>
+        )
+      },
+
+      {
         path: '/login',
         element: <Login />
       },
-      
+      {
+        path: '/register',
+        element: <Register />
+      },
+      {
+        path: '/update-password',
+        element: <SendOtp />
+      },
+      {
+        path: '/verify-otp',
+        element: <VerifyOtp />
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPassword />
+      },
+      {
+        path: '/forgot-password',
+        element: <SendOtp />
+      },
+
     ],
   },
 ])
