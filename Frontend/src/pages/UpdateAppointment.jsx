@@ -231,10 +231,6 @@ const UpdateAppointment = () => {
                     rows={4}
                     {...register("symptoms", { 
                       required: "Symptoms are required",
-                      minLength: {
-                        value: 10,
-                        message: "Please provide more details (min 10 characters)"
-                      }
                     })}
                     className={errors.symptoms ? "border-red-500" : ""}
                   />
