@@ -33,9 +33,9 @@ const generateaccesstokenandrefreshtoken = async (patientId) => {
 };
 
 const registerdoctor = asyncHandler(async (req, res) => {
-    const { doctorname, doctorusername, email, password, phonenumber, sex, age, experience, qualification, department, specialization, hospitalname, shift } = req.body;
+    const { doctorname, doctorusername, email, password, phonenumber, sex, age, experience, qualification, department, specialization, shift } = req.body;
 
-    if ([doctorname, doctorusername, email, password, phonenumber, sex, age, experience, qualification, department, specialization, hospitalname, shift].some((field) => !field || field?.trim() === "")) {
+    if ([doctorname, doctorusername, email, password, phonenumber, sex, age, experience, qualification, department, specialization, shift].some((field) => !field || field?.trim() === "")) {
         throw new apiError(400, "All fields are required");
     }
     const existeddoctor = await Doctor.findOne({
@@ -82,7 +82,6 @@ const registerdoctor = asyncHandler(async (req, res) => {
         qualification,
         department: department.toLowerCase(),
         specialization,
-        hospitalname,
         shift: shiftarray
     });
     if (!doctor) {
@@ -241,8 +240,26 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
     return res.status(200).json(new apiResponse(200, {}, "Password reset successfully"));
 });
 
+
+const getdoctorprofiledetails = asyncHandler(async (req, res) => {
+    const { doctorid } = req.params
+    const doctor = await Doctor.findById(doctorid).select('-password -refreshtoken -verificationdocument.aadhar -verificationdocument.medicaldegree -verificationdocument.medicallicense')
+    if (!doctor) {
+        throw new apiError(404, "Doctor not found")
+    }
+    return res.status(200)
+        .json(new apiResponse(200, doctor, "profile fetched successfully"))
+})
+const getdoctorprofiledetailsprivate = asyncHandler(async (req, res) => {
+    const doctor = await Doctor.findById(req.doctor?._id).select("-password -refreshtoken")
+    if (!doctor) {
+        throw new apiError(404, "Doctor not found")
+    }
+    return res.status(200)
+        .json(new apiResponse(200, doctor, "profile fetched successfully"))
+})
 const updateprofile = asyncHandler(async (req, res) => {
-    const { doctorname, email, phonenumber, age, sex, experience, qualification, specialization } = req.body;
+    const { doctorname, email, phonenumber, age, sex, experience, qualification, specialization, shift } = req.body;
 
     const updates = {};
     if (doctorname) updates.doctorname = doctorname;
@@ -253,6 +270,7 @@ const updateprofile = asyncHandler(async (req, res) => {
     if (experience) updates.experience = experience;
     if (qualification) updates.qualification = qualification
     if (specialization) updates.specialization = specialization
+    if (shift) updates.shift = JSON.parse(shift)
 
     if (Object.keys(updates).length === 0) {
         throw new apiError(400, "At least one field is required to update");
@@ -272,24 +290,6 @@ const updateprofile = asyncHandler(async (req, res) => {
         .status(200)
         .json(new apiResponse(200, updateddoctor, "Profile updated successfully"));
 });
-
-const getdoctorprofiledetails = asyncHandler(async (req, res) => {
-    const { doctorid } = req.params
-    const doctor = await Doctor.findById(doctorid).select('-password -refreshtoken -verificationdocument.aadhar -verificationdocument.medicaldegree -verificationdocument.medicallicense')
-    if (!doctor) {
-        throw new apiError(404, "Doctor not found")
-    }
-    return res.status(200)
-        .json(new apiResponse(200, doctor, "profile fetched successfully"))
-})
-const getdoctorprofiledetailsprivate = asyncHandler(async (req, res) => {
-    const doctor = await Doctor.findById(req.doctor?._id).select("-password -refreshtoken")
-    if (!doctor) {
-        throw new apiError(404, "Doctor not found")
-    }
-    return res.status(200)
-        .json(new apiResponse(200, doctor, "profile fetched successfully"))
-})
 
 const getalldoctorprofiledetails = asyncHandler(async (req, res) => {
     const search = req.query.search?.trim() || "";
@@ -384,4 +384,4 @@ const getCurrentDoctor = asyncHandler(async (req, res) => {
     }
     return res.status(200).json(new apiResponse(200, doctor, "Current doctor fetched successfully"));
 });
-export { registerdoctor, logindoctor, logoutdoctor, accesstokenrenewal, updatepassword, resetForgottenPassword, getdoctorprofiledetails, updateprofile, updateprofilepic, updatedocument, getalldoctorprofiledetails, getdoctorprofiledetailsprivate, getdoctorbydept,getCurrentDoctor }; 
+export { registerdoctor, logindoctor, logoutdoctor, accesstokenrenewal, updatepassword, resetForgottenPassword, getdoctorprofiledetails, updateprofile, updateprofilepic, updatedocument, getalldoctorprofiledetails, getdoctorprofiledetailsprivate, getdoctorbydept, getCurrentDoctor }; 

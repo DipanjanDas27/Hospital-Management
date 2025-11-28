@@ -1,5 +1,4 @@
 import express from "express"
-import http from "http"
 import cors from "cors"
 import cookieparser from "cookie-parser"
 import { apiError } from "./utils/apiError.js"

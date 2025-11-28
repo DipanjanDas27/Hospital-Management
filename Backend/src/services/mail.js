@@ -17,8 +17,6 @@ const sendMail = async ({ to, subject, html }) => {
     return result;
   } catch (error) {
     console.error('Error sending email:', error);
-    throw new Error('Failed to send email');
-
   }
 };
 

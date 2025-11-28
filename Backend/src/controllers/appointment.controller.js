@@ -19,20 +19,18 @@ const formatTime = (date) => {
     return date.toTimeString().slice(0, 5);
 };
 
-// Utility function to automatically cancel expired confirmed appointments
+
 const autoCancelExpiredAppointments = async () => {
     try {
         const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0); // Set to start of day for date comparison
+        currentDate.setHours(0, 0, 0, 0); 
 
-        // Find all confirmed appointments where appointment date has passed
         const expiredAppointments = await Appointment.find({
             status: "Confirmed",
             appointmentdate: { $lt: currentDate }
         });
 
         if (expiredAppointments.length > 0) {
-            // Update all expired appointments to cancelled status
             const result = await Appointment.updateMany(
                 {
                     status: "Confirmed",
@@ -350,7 +348,6 @@ const getappointment = asyncHandler(async (req, res) => {
         throw new apiError(401, "Unauthorized patient request");
     }
     
-    // Check and auto-cancel expired appointments before fetching
     await autoCancelExpiredAppointments();
     
     const appointment = await Appointment.findById(appointmentid)
@@ -366,20 +363,18 @@ const getallappointmentforpatient = asyncHandler(async (req, res) => {
         throw new apiError(401, "Unauthorized patient request");
     }
     
-    // Check and auto-cancel expired appointments before fetching
     await autoCancelExpiredAppointments();
     
-    const patientusername = req.patient?.patientusername
+    const patientusername = req.patient?.patientusername 
     const appointments = await Appointment.find({ "patientdetails.patientusername": patientusername }).select("doctordetails appointmenttime appointmentdate status")
 
     return res.status(200).json(new apiResponse(200, appointments, "All appointments fetched successfully"))
 })
-const getallappointmentfordoctor = asyncHandler(async (req, res) => {
+const gettodayappointmentfordoctor = asyncHandler(async (req, res) => {
     if (!req.doctor) {
         throw new apiError(401, "Unauthorized doctor request");
     }
 
-    // Check and auto-cancel expired appointments before fetching
     await autoCancelExpiredAppointments();
 
     const doctorusername = req.doctor?.doctorusername;
@@ -392,25 +387,33 @@ const getallappointmentfordoctor = asyncHandler(async (req, res) => {
 
     const appointments = await Appointment.find({
         "doctordetails.doctorusername": doctorusername,
-        status: { $in: ["Confirmed", "Completed"] },
+        status: { $in: ["Confirmed"] },
         appointmentdate: { $gte: startOfDay, $lte: endOfDay },
     }).select("patientdetails appointmenttime appointmentdate status");
-
-    if (!appointments.length) {
-        throw new apiError(404, "No appointments found for today");
-    }
-
+    
     return res
         .status(200)
         .json(new apiResponse(200, appointments, "Today's confirmed and completed appointments fetched successfully"));
 });
 
+const getallappointmentfordoctor= asyncHandler(async(req,res)=>{
+    if (!req.doctor) {
+        throw new apiError(401, "Unauthorized doctor request");
+    }
+    
+    await autoCancelExpiredAppointments();
+    
+    const doctorusername = req.doctor?.doctorusername
+    const appointments = await Appointment.find({ "doctordetails.doctorusername": doctorusername, status: { $in: ["Confirmed", "Completed"] }, }).select("patientdetails appointmenttime appointmentdate status")
+
+    return res.status(200).json(new apiResponse(200, appointments, "All appointments fetched successfully"))
+})
 const getallappointmentforadmin = asyncHandler(async (req, res) => {
     if (!req.admin) {
         throw new apiError(401, "Unauthorized admin request");
     }
     
-    // Check and auto-cancel expired appointments before fetching
+    
     await autoCancelExpiredAppointments();
     
     const appointments = await Appointment.find().select("patientdetails doctordetails appointmenttime appointmentdate status")
@@ -422,20 +425,19 @@ const verifyappointment = asyncHandler(async (req, res) => {
     if (!req.doctor) {
         throw new apiError(401, "Unauthorized doctor request");
     }
-    const { uniquecode } = req.body
-    const { appointmentid } = req.params
+    const { code,appointmentid } = req.body
     const appointment = await Appointment.findById(appointmentid)
     if (!appointment) {
         throw new apiError(404, "The appointment is not found.")
     }
-    if (appointment.uniquecode !== uniquecode) {
+    if (appointment.uniquecode !== code) {
         throw new apiError(400, "The given confirmation code is wrong or invalid")
     }
     appointment.uniquecode = ""
     appointment.status = "Completed"
-    await appointment.save({ validdateBeforesave: false })
+    await appointment.save({ validateBeforeSave: false })
 
     return res.status(200).json(200, appointment, "Your appointment is verified successfully")
 })
 
-export { createAppointment, cancelappointment, updateappointment, getappointment, getallappointmentforpatient, getallappointmentfordoctor, getallappointmentforadmin, verifyappointment, checkavailability }
+export { createAppointment, cancelappointment, updateappointment, getappointment, getallappointmentforpatient, gettodayappointmentfordoctor, getallappointmentforadmin,getallappointmentfordoctor, verifyappointment, checkavailability }

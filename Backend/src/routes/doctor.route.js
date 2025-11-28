@@ -4,7 +4,7 @@ import { upload } from '../middlewares/multer.middleware.js';
 import { verifydoctor } from '../middlewares/doctorauth.middleware.js';
 import { verifyTempjwt } from "../middlewares/verifytempjwt.middleware.js"
 import { sendotp, verifyotp, sendForgetPasswordOtp, verifyForgotPasswordOtp } from "../controllers/otp.controller.js"
-import { getallappointmentfordoctor, getappointment, verifyappointment } from "../controllers/appointment.controller.js";
+import { getallappointmentfordoctor, getappointment, gettodayappointmentfordoctor, verifyappointment } from "../controllers/appointment.controller.js";
 import { createprescription, getprescription, getallprescriptionsfordoctor, getprescriptionbyappointment, updateprescription, deleteprescription } from "../controllers/prescription.contorller.js";
 import { createlabtest, getlabtest, getalllabtestsfordoctor, getlabtestbyprescription, updatelabtest, updatetestresults, verifylabtest, deletelabtest } from "../controllers/labtest.controller.js";
 
@@ -59,12 +59,13 @@ router.route("/forgot-password/verify-otp").post(verifyTempjwt, verifyForgotPass
 router.route("/forgot-password/update-password").patch(verifyTempjwt, resetForgottenPassword);
 
 
-router.route("/appointments").get(verifydoctor,getallappointmentfordoctor)
+router.route("/todayappointments").get(verifydoctor,gettodayappointmentfordoctor)
+router.route("/appointments").get(verifydoctor,getallappointmentfordoctor) 
 router.route("/appointments/verify-appointment").post(verifydoctor,verifyappointment)
 router.route("/appointments/:appointmentid").get(verifydoctor,getappointment)
 router.route("/get-doctor").get(verifydoctor,getCurrentDoctor)
 
-// Prescription routes - Full CRUD access for doctors
+
 router.route("/prescriptions").get(verifydoctor, getallprescriptionsfordoctor);
 router.route("/prescriptions/appointment/:appointmentid").get(verifydoctor, getprescriptionbyappointment);
 router.route("/prescriptions/:appointmentid").post(verifydoctor, createprescription);
@@ -72,7 +73,7 @@ router.route("/prescriptions/:prescriptionid").get(verifydoctor, getprescription
 router.route("/prescriptions/:prescriptionid").patch(verifydoctor, updateprescription);
 router.route("/prescriptions/:prescriptionid").delete(verifydoctor, deleteprescription);
 
-// Labtest routes - Full CRUD access for doctors
+
 router.route("/labtests").get(verifydoctor, getalllabtestsfordoctor);
 router.route("/labtests").post(verifydoctor, createlabtest);
 router.route("/labtests/prescription/:prescriptionid").get(verifydoctor, getlabtestbyprescription);
