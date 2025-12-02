@@ -5,92 +5,78 @@ import {
   Users,
   Calendar,
   CheckCircle2,
-  Clock,
   TrendingUp
 } from "lucide-react";
 import { getAllAppointments, getTodayAppointments } from "@/services/appointmentApi";
 
 const StatsOverview = () => {
-  const dispatch = useDispatch()
-  const { stats } = useSelector((state) => state.doctor);
-  const { todayappointments, appointments } = useSelector((state) => state.doctorAppointment)
-  useEffect(() => {
-    dispatch(getTodayAppointments())
-  }, [dispatch])
+  const dispatch = useDispatch();
+  const { todayappointments, appointments } = useSelector((state) => state.doctorAppointment);
 
   useEffect(() => {
-    dispatch(getAllAppointments())
-  }, [dispatch])
+    dispatch(getTodayAppointments());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getAllAppointments());
+  }, [dispatch]);
 
   let count = 0;
   const completecount = () => {
-    todayappointments.map((appointment) => {
+    todayappointments?.forEach((appointment) => {
       if (appointment.status === "completed") count++;
-    })
+    });
     return count;
-  }
+  };
+
   const totalPatients = () => {
     const uniquePatients = new Set();
-
-    appointments.forEach((appointment) => {
+    appointments?.forEach((appointment) => {
       if (appointment.status === "Completed") {
-        uniquePatients.add(appointment.patientdetails.patientusername);
+        uniquePatients.add(appointment.patientdetails?.patientusername);
       }
     });
-
     return uniquePatients.size;
   };
+
   const getYesterdayCount = () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-
-    return appointments.filter(a =>
+    return appointments?.filter(a =>
       new Date(a.appointmentdate).toDateString() === yesterday.toDateString()
-    ).length;
+    ).length || 0;
   };
 
-  const todayCount = todayappointments.length;
+  const todayCount = todayappointments?.length || 0;
   const yesterdayCount = getYesterdayCount();
-
   const todayChange = todayCount - yesterdayCount;
 
   const getUniquePatientsThisWeek = () => {
     const now = new Date();
     const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay()); // Sunday
-
+    weekStart.setDate(now.getDate() - now.getDay());
     const unique = new Set();
-
-    appointments.forEach(a => {
+    appointments?.forEach(a => {
       const date = new Date(a.appointmentdate);
       if (date >= weekStart && date <= now && a.status === "Completed") {
-        unique.add(a.patientdetails.patientusername);
+        unique.add(a.patientdetails?.patientusername);
       }
     });
-
     return unique.size;
   };
 
   const thisWeekPatients = getUniquePatientsThisWeek();
-
-  
-
   const completedToday = completecount();
-
-  const completionRate =
-    todayappointments.length === 0
-      ? 0
-      : Math.round((completedToday / todayappointments.length) * 100);
-
+  const completionRate = todayappointments?.length === 0
+    ? 0
+    : Math.round((completedToday / todayappointments.length) * 100);
 
   const statCards = [
     {
       title: "Today's Appointments",
-      value: todayappointments?.length,
+      value: todayCount,
       icon: Calendar,
       color: "from-teal-500 to-teal-600",
-      bgColor: "bg-teal-50",
-      iconColor: "text-teal-600",
       change: todayChange ? (todayChange > 0 ? `+${todayChange} since yesterday` : `${todayChange} since yesterday`) : "No change"
     },
     {
@@ -98,23 +84,19 @@ const StatsOverview = () => {
       value: totalPatients(),
       icon: Users,
       color: "from-emerald-500 to-emerald-600",
-      bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-600",
       change: thisWeekPatients ? `+${thisWeekPatients} this week` : "No new patients this week"
     },
     {
       title: "Completed Today",
-      value: completecount(),
+      value: completedToday,
       icon: CheckCircle2,
       color: "from-cyan-500 to-cyan-600",
-      bgColor: "bg-cyan-50",
-      iconColor: "text-cyan-600",
       change: `${completionRate}% completion rate`
-    },
+    }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (

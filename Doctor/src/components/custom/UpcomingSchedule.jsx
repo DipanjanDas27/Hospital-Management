@@ -1,3 +1,4 @@
+// UpcomingSchedule.jsx - Keep as is
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,6 @@ import { Calendar, Clock } from "lucide-react";
 const UpcomingSchedule = () => {
   const { appointments } = useSelector((state) => state.doctorAppointment);
 
-  // Utility → format date
   const formatDate = (date) =>
     new Date(date).toLocaleDateString("en-US", {
       weekday: "short",
@@ -15,32 +15,27 @@ const UpcomingSchedule = () => {
       day: "numeric",
     });
 
-  // Generate next 5 days starting tomorrow
   const nextFiveDays = Array.from({ length: 5 }).map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + (i + 1));
     return d;
   });
 
-  // Compute schedule for each day
   const schedule = useMemo(() => {
     return nextFiveDays.map((dateObj) => {
       const dateStr = dateObj.toDateString();
-
-      // Filter appointments for this date
-      const dayAppointments = appointments.filter(
+      const dayAppointments = appointments?.filter(
         (a) => new Date(a.appointmentdate).toDateString() === dateStr
-      );
+      ) || [];
 
       if (dayAppointments.length === 0) {
         return {
           date: formatDate(dateObj),
           appointments: 0,
-          hours: "No appointments scheduled",
+          hours: "No appointments",
         };
       }
 
-      // Get earliest & latest appointment times
       const times = dayAppointments.map((a) => a.appointmenttime);
       const sortedTimes = [...times].sort();
 
@@ -69,7 +64,6 @@ const UpcomingSchedule = () => {
           >
             <div className="flex items-center justify-between mb-1">
               <p className="font-semibold text-gray-900 text-sm">{day.date}</p>
-
               <Badge
                 variant={day.appointments > 0 ? "secondary" : "outline"}
                 className="text-xs"
@@ -77,7 +71,6 @@ const UpcomingSchedule = () => {
                 {day.appointments} appointments
               </Badge>
             </div>
-
             <p className="text-xs text-gray-600 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {day.hours}

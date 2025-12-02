@@ -20,7 +20,7 @@ const QuickActions = () => {
       color: "bg-teal-50 hover:bg-teal-100 text-teal-700"
     },
     { 
-      label: "My profile", 
+      label: "My Profile", 
       icon: Users, 
       path: "/profile", 
       color: "bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
@@ -36,7 +36,7 @@ const QuickActions = () => {
       icon: BarChart3, 
       path: "/labtests",
       color: "bg-orange-50 hover:bg-orange-100 text-orange-700"
-    },
+    }
   ];
 
   return (
@@ -65,3 +65,5 @@ const QuickActions = () => {
 };
 
 export default QuickActions;
+
+

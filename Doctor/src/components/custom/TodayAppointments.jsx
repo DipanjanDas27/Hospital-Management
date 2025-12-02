@@ -24,10 +24,10 @@ import { getTodayAppointments } from "@/services/appointmentApi";
 const TodayAppointments = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const { todayappointments, loading, error } = useSelector(
     (state) => state.doctorAppointment
   );
+
   useEffect(() => {
     dispatch(getTodayAppointments());
   }, [dispatch]);
@@ -66,8 +66,6 @@ const TodayAppointments = () => {
     );
   }
 
- 
-
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader>
@@ -78,7 +76,7 @@ const TodayAppointments = () => {
               Today's Appointments
             </CardTitle>
             <CardDescription className="mt-2">
-              You have {todayappointments.length} appointments scheduled for today
+              You have {todayappointments?.length || 0} appointments scheduled for today
             </CardDescription>
           </div>
           <Button variant="outline" onClick={() => navigate("/todayappointments")}>
@@ -89,25 +87,23 @@ const TodayAppointments = () => {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {todayappointments.slice(0,4).map((appointment, index) => (
+        {todayappointments?.slice(0, 4).map((appointment, index) => (
           <div key={appointment._id}>
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              
-              {/* Left Section */}
               <div className="flex items-center gap-4 flex-1">
                 <Avatar className="w-12 h-12 border-2 border-teal-200">
                   <AvatarFallback className="bg-teal-100 text-teal-700 font-semibold">
-                    {appointment.patientdetails.patientname
-                      .split(" ")
+                    {appointment.patientdetails?.patientname
+                      ?.split(" ")
                       .map((n) => n[0])
-                      .join("")}
+                      .join("") || "P"}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
                     <h4 className="font-semibold text-gray-900">
-                      {appointment.patientdetails.patientname}
+                      {appointment.patientdetails?.patientname || "Patient"}
                     </h4>
                     <Badge
                       variant={
@@ -126,26 +122,32 @@ const TodayAppointments = () => {
                       <Clock className="w-4 h-4" />
                       {appointment.appointmenttime}
                     </span>
-                    <span>•</span>
-                    <span>{appointment.type}</span>
+                    {appointment.type && (
+                      <>
+                        <span>•</span>
+                        <span>{appointment.type}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Right CTA */}
-              <Button size="sm" variant="ghost" className="gap-2"
-              onClick={()=>navigate(`/appointments/${appointment._id}`)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="gap-2"
+                onClick={() => navigate(`/appointments/${appointment._id}`)}
+              >
                 View Details
                 <ArrowRight className="w-4 h-4" />
               </Button>
-
             </div>
 
-            {index < todayappointments.length - 1 && <Separator className="my-4" />}
+            {index < (todayappointments?.length || 0) - 1 && <Separator className="my-4" />}
           </div>
         ))}
 
-        {todayappointments.length === 0 && (
+        {(!todayappointments || todayappointments.length === 0) && (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">No appointments scheduled for today</p>
