@@ -72,7 +72,7 @@ function DepartmentList() {
                 key={dept._id}
                 name={dept.deptname}
                 description={dept.description}
-                onClick={() => navigate(`/departments/${dept.deptname}/doctors`)}
+                onClick={() => navigate(`/departments/${dept.deptname.toLowerCase()}/doctors`)}
               />
             ))}
           </div>
