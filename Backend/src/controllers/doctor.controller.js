@@ -259,7 +259,7 @@ const getdoctorprofiledetailsprivate = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, doctor, "profile fetched successfully"))
 })
 const updateprofile = asyncHandler(async (req, res) => {
-    const { doctorname, email, phonenumber, age, sex, experience, qualification, specialization, shift } = req.body;
+    const { doctorname, email, phonenumber, age, sex, experience, qualification,department, specialization, shift } = req.body;
 
     const updates = {};
     if (doctorname) updates.doctorname = doctorname;
@@ -270,6 +270,7 @@ const updateprofile = asyncHandler(async (req, res) => {
     if (experience) updates.experience = experience;
     if (qualification) updates.qualification = qualification
     if (specialization) updates.specialization = specialization
+    if (department) updates.department = department.toLowerCase()
     if (shift) updates.shift = JSON.parse(shift)
 
     if (Object.keys(updates).length === 0) {

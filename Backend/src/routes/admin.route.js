@@ -4,7 +4,7 @@ import { upload } from '../middlewares/multer.middleware.js';
 import { verifyadmin } from '../middlewares/adminauth.middleware.js';
 import { verifyTempjwt } from "../middlewares/verifytempjwt.middleware.js";
 import { sendotp, sendForgetPasswordOtp, verifyotp, verifyForgotPasswordOtp } from "../controllers/otp.controller.js";
-import { getallappointmentforadmin } from "../controllers/appointment.controller.js";
+import { getallappointmentforadmin,gettodayappointment } from "../controllers/appointment.controller.js";
 import { getalldoctorprofiledetails, getdoctorprofiledetails } from "../controllers/doctor.controller.js";
 import { createDepartment, getAllDepartments, updateDepartment } from "../controllers/department.controller.js";
 import { getprescription, getallprescriptions } from "../controllers/prescription.contorller.js";
@@ -48,7 +48,7 @@ router.route("/forgot-password/verify-otp").post(verifyTempjwt, verifyForgotPass
 router.route("/forgot-password/update-password").patch(verifyTempjwt, resetForgottenPassword);
 
 
-
+router.route("/todayappointments").get(verifyadmin,gettodayappointment)
 router.route("/appointments").get(verifyadmin, getallappointmentforadmin);
 router.route("/doctors").get(verifyadmin, getalldoctorprofiledetails);
 router.route("/doctors/:doctorid").get(verifyadmin, getdoctorprofiledetails);

@@ -105,10 +105,6 @@ const doctorSchema = new Schema({
         type: String,
         required: true,
     },
-    hospitalname: {
-        type: String,
-        required: true,
-    },
     refreshtoken: {
         type: String
     }

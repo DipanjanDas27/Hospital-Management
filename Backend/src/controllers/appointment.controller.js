@@ -370,7 +370,7 @@ const getallappointmentforpatient = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new apiResponse(200, appointments, "All appointments fetched successfully"))
 })
-const gettodayappointmentfordoctor = asyncHandler(async (req, res) => {
+const gettodayappointment = asyncHandler(async (req, res) => {
     if (!req.doctor) {
         throw new apiError(401, "Unauthorized doctor request");
     }
@@ -440,4 +440,4 @@ const verifyappointment = asyncHandler(async (req, res) => {
     return res.status(200).json(200, appointment, "Your appointment is verified successfully")
 })
 
-export { createAppointment, cancelappointment, updateappointment, getappointment, getallappointmentforpatient, gettodayappointmentfordoctor, getallappointmentforadmin,getallappointmentfordoctor, verifyappointment, checkavailability }
+export { createAppointment, cancelappointment, updateappointment, getappointment, getallappointmentforpatient, gettodayappointment, getallappointmentforadmin,getallappointmentfordoctor, verifyappointment, checkavailability }
