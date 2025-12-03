@@ -113,12 +113,14 @@ const loginPatient = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: false,
+        secure: true,
+        sameSite: "none",
+        path: "/",
     }
     return res
         .status(200)
-        .cookie("accesstoken", accesstoken, options)
-        .cookie("refreshtoken",newrefreshtoken, options)
+        .cookie("accessToken", accesstoken, options)
+        .cookie("refreshToken",newrefreshtoken, options)
         .json(
             new apiResponse(
                 200,
