@@ -5,8 +5,12 @@ import { apiError } from "./utils/apiError.js"
 
 
 const app = express()
+const allowedOrigins = [
+  process.env.CORS_ORIGIN_DOCTOR,
+  process.env.CORS_ORIGIN_PATIENT,
+];
 
-app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }))
+app.use(cors({ origin: allowedOrigins, credentials: true }))
 app.use(cookieparser())
 app.use(express.json({ limit: "20kb" }))
 app.use(express.urlencoded({ extended: true, limit: "20kb" }))
