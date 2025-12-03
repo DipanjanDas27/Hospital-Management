@@ -230,7 +230,7 @@ function Login() {
                       type="button"
                       variant="link"
                       className="text-blue-600 hover:text-blue-700 p-0 h-auto font-semibold"
-                      onClick={() => navigate("/signup")}
+                      onClick={() => navigate("/register")}
                     >
                       Sign Up
                     </Button>
