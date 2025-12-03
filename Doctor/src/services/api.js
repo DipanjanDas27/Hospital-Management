@@ -43,7 +43,7 @@ api.interceptors.response.use(
       try {
        
         const res = await axios.post(
-          "http://localhost:8000/api/v1/doctor/renew-access-token",
+          "https://hms-backend-m5m4.onrender.com/api/v1/doctor/renew-access-token",
           {},
           { withCredentials: true }
         );
