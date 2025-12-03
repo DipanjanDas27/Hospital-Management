@@ -6,11 +6,23 @@ import { apiError } from "./utils/apiError.js"
 
 const app = express()
 const allowedOrigins = [
-  process.env.CORS_ORIGIN_DOCTOR,
-  process.env.CORS_ORIGIN_PATIENT,
+    process.env.CORS_ORIGIN_DOCTOR,
+    process.env.CORS_ORIGIN_PATIENT,
 ];
 
-app.use(cors({ origin: allowedOrigins, credentials: true }))
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true); // allow Postman/localhost
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        credentials: true,
+    })
+);
 app.use(cookieparser())
 app.use(express.json({ limit: "20kb" }))
 app.use(express.urlencoded({ extended: true, limit: "20kb" }))
@@ -27,7 +39,7 @@ app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/patient/appointments", appointmentRouter)
 
 app.get("/", (req, res) => {
-  res.send("Backend is running successfully!");
+    res.send("Backend is running successfully!");
 });
 
 
