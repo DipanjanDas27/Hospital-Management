@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1/patient', 
+  baseURL: 'https://hms-backend-m5m4.onrender.com/api/v1/patient', 
   withCredentials: true,
 })
 
