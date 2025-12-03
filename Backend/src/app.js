@@ -22,6 +22,11 @@ app.use("/api/v1/doctor", doctorRouter)
 app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/patient/appointments", appointmentRouter)
 
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully!");
+});
+
+
 
 app.use((err, req, res, next) => {
     console.error("Error caught by middleware:", err);
