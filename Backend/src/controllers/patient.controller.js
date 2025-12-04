@@ -161,38 +161,48 @@ const logoutPatient = asyncHandler(async (req, res) => {
 })
 
 const accesstokenrenewal = asyncHandler(async (req, res) => {
-    const { refreshtoken } = req.cookies ;
+    const { refreshToken } = req.cookies;  // ✅ FIXED NAME
 
-    if (!refreshtoken) {
+    if (!refreshToken) {
         throw new apiError(401, "Unauthorized request");
     }
-    const decodetoken = jwt.verify(refreshtoken, process.env.REFRESH_TOKEN_SECRET);
-    if (!decodetoken) {
-        throw new apiError(401, "invalid refresh token");
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    if (!decoded) {
+        throw new apiError(401, "Invalid refresh token");
     }
-    const patient = await Patient.findById(decodetoken._id);
+
+    const patient = await Patient.findById(decoded._id);
     if (!patient) {
         throw new apiError(404, "Patient not found");
     }
-    if (patient.refreshtoken !== refreshtoken) {
-        throw new apiError(401, "Invalid refresh token or token is expired");
-    }
-    const { accesstoken, newrefreshtoken } = await generateaccesstokenandrefreshtoken(patient._id);
 
+    if (patient.refreshtoken !== refreshToken) {
+        throw new apiError(401, "Refresh token mismatch or expired");
+    }
+
+    const { accesstoken, newrefreshtoken } =
+        await generateaccesstokenandrefreshtoken(patient._id);
 
     const options = {
         httpOnly: true,
         secure: true,
         sameSite: "none",
         path: "/",
-    }
+    };
+
     return res
         .status(200)
         .cookie("accessToken", accesstoken, options)
         .cookie("refreshToken", newrefreshtoken, options)
-        .json(new apiResponse(200, { accesstoken, refreshtoken: newrefreshtoken }, "Access token renewed successfully"));
-
-})
+        .json(
+            new apiResponse(
+                200,
+                { accesstoken, refreshToken: newrefreshtoken },
+                "Access token renewed successfully"
+            )
+        );
+});
 
 const updatepassword = asyncHandler(async (req, res) => {
     const { oldpassword, newpassword } = req.body;
