@@ -89,7 +89,7 @@ api.interceptors.response.use(
         { withCredentials: true }
       );
 
-      const newAccessToken = refreshRes?.data?.data?.accesstoken;
+      const newAccessToken = refreshRes?.data?.data?.accessToken;
       if (!newAccessToken) throw new Error("No access token returned on refresh");
 
       // Set header for all future requests

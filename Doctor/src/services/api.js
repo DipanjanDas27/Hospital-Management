@@ -78,7 +78,7 @@ api.interceptors.response.use(
         { withCredentials: true }
       );
 
-      const newAccessToken = refreshRes?.data?.data?.accessToken;
+      const newAccessToken = refreshRes?.data?.data?.accesstoken;
       if (!newAccessToken) throw new Error("No access token returned");
 
       api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
