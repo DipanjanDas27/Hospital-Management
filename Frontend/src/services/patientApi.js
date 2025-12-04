@@ -17,9 +17,6 @@ export const loginPatient = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const res = await api.post("/login", payload);
-
-      // ⭐ VERY IMPORTANT ⭐
-      // Attach the access token to axios for all future requests
       const accessToken = res.data?.data?.accesstoken;
       if (accessToken) {
         api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
@@ -165,11 +162,18 @@ export const getdoctorbydepartment= createAsyncThunk("patient/getdoctorbydepartm
   }
 });
 
-export const getCurrentPatient = createAsyncThunk("patient/getCurrentPatient", async (_, { rejectWithValue }) => {
-  try {
-    const res = await api.get("/get-patient");
-    return res.data.data;
-  } catch (err) {
-    return rejectWithValue(null);
+export const getCurrentPatient = createAsyncThunk(
+  "auth/getCurrentPatient",
+  async (_, { rejectWithValue }) => {
+    try {
+      
+      await api.post("/renew-access-token");
+
+      const res = await api.get("/profile");
+
+      return res.data.data;
+    } catch (error) {
+      return rejectWithValue(null); 
+    }
   }
-});
+);
