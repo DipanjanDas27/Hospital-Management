@@ -1,18 +1,13 @@
 // src/services/patientApi.js
 import axios from "axios";
 
-// ----------------------------
-// BASE API INSTANCE
-// ----------------------------
+
 const api = axios.create({
   baseURL: "https://hms-backend-m5m4.onrender.com/api/v1/patient",
   withCredentials: true, // needed for refreshToken cookie
 });
 
-// ----------------------------
-// REQUEST INTERCEPTOR
-// ----------------------------
-// This ensures EVERY request includes Authorization header if token exists
+
 api.interceptors.request.use((config) => {
   const token = api.defaults.headers.common["Authorization"];
   if (token) {
@@ -21,9 +16,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ----------------------------
-// REFRESH TOKEN LOGIC
-// ----------------------------
 let isRefreshing = false;
 let failedQueue = [];
 
