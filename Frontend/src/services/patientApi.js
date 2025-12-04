@@ -167,10 +167,7 @@ export const getCurrentPatient = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       
-      await api.post("/renew-access-token");
-
       const res = await api.get("/profile");
-
       return res.data.data;
     } catch (error) {
       return rejectWithValue(null); 
