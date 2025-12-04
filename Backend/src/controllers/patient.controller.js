@@ -6,6 +6,7 @@ import { apiResponse } from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
 import sendMail from '../services/mail.js';
 import { welcomeemailtemplate, logintemplate } from '../utils/emailtemplate.js';
+import path from 'path';
 
 const generateaccesstokenandrefreshtoken = async (patientId) => {
     try {
@@ -148,12 +149,14 @@ const logoutPatient = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: true,
+        sameSite: "none",
+        path: "/",
     }
 
     return res
         .status(200)
-        .clearCookie("accesstoken", options)
-        .clearCookie("refreshtoken", options)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
         .json(new apiResponse(200, {}, "User logged Out"))
 })
 
@@ -180,12 +183,13 @@ const accesstokenrenewal = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: true,
-
+        sameSite: "none",
+        path: "/",
     }
     return res
         .status(200)
-        .cookie("accesstoken", accesstoken, options)
-        .cookie("refreshtoken", newrefreshtoken, options)
+        .cookie("accessToken", accesstoken, options)
+        .cookie("refreshToken", newrefreshtoken, options)
         .json(new apiResponse(200, { accesstoken, refreshtoken: newrefreshtoken }, "Access token renewed successfully"));
 
 })
