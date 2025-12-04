@@ -17,18 +17,23 @@ export const registerDoctor = createAsyncThunk(
     }
 );
 
-// ✅ Login Doctor
 export const loginDoctor = createAsyncThunk(
     "doctor/loginForDoctor",
     async (credentials, { rejectWithValue }) => {
         try {
             const res = await api.post("/login", credentials);
+
+            const accessToken = res?.data?.data?.accessToken;
+            if (accessToken) {
+                api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+            }
+
             return res.data.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || "Login failed");
         }
     }
-); 
+);
 
 // ✅ Logout Doctor
 export const logoutDoctor = createAsyncThunk(
