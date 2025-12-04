@@ -181,7 +181,7 @@ export const getCurrentPatient = createAsyncThunk(
           console.debug("startup: renew failed (ok to ignore):", e?.response?.data || e.message);
         }
       }
-      const res = await api.get("/profile");
+      const res = await api.get("/get-patient");
       return res.data.data;
     } catch (error) {
       return rejectWithValue(null);
