@@ -1,12 +1,29 @@
 // src/services/patientApi.js
 import axios from "axios";
 
+// ----------------------------
+// BASE API INSTANCE
+// ----------------------------
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://hms-backend-m5m4.onrender.com/api/v1/patient",
-  withCredentials: true, // important to send cookies
+  baseURL: "https://hms-backend-m5m4.onrender.com/api/v1/patient",
+  withCredentials: true, // needed for refreshToken cookie
 });
 
-// queue helpers
+// ----------------------------
+// REQUEST INTERCEPTOR
+// ----------------------------
+// This ensures EVERY request includes Authorization header if token exists
+api.interceptors.request.use((config) => {
+  const token = api.defaults.headers.common["Authorization"];
+  if (token) {
+    config.headers["Authorization"] = token;
+  }
+  return config;
+});
+
+// ----------------------------
+// REFRESH TOKEN LOGIC
+// ----------------------------
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -18,12 +35,10 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// helper to check cookie presence safely
 const hasRefreshCookie = () => {
   try {
-    // look for cookie name refreshToken (exact substring)
     return document.cookie.split(";").some((c) => c.trim().startsWith("refreshToken="));
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -33,71 +48,65 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // if no response or not 401, forward
+    // If error is not 401 → return normally
     if (!error.response || error.response.status !== 401) {
       return Promise.reject(error);
     }
 
-    // If no refresh cookie => user is not logged in, do not attempt refresh
+    // If no refresh cookie exists → do not try refresh
     if (!hasRefreshCookie()) {
       return Promise.reject(error);
     }
 
-    // protect from retry loops
+    // Prevent infinite loops
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // if a refresh is already happening, queue this request
+    // If refresh already in progress → queue this request
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({
           resolve: (token) => {
-            if (!originalRequest.headers) originalRequest.headers = {};
+            originalRequest.headers = originalRequest.headers || {};
             originalRequest.headers["Authorization"] = `Bearer ${token}`;
-            resolve(api(originalRequest));
+            resolve(api(originalRequest)); // retry original request
           },
-          reject: (err) => reject(err),
+          reject,
         });
       });
     }
 
-    // start refresh
+    // Mark for retry
     originalRequest._retry = true;
     isRefreshing = true;
 
     try {
+      // Call refresh endpoint WITHOUT using `api` instance
       const refreshRes = await axios.post(
-        // use full URL to avoid using this instance's interceptors
-        `${import.meta.env.VITE_API_URL?.replace(/\/api\/v1\/patient\/?$/, "") || "https://hms-backend-m5m4.onrender.com"}/api/v1/patient/renew-access-token`,
+        "https://hms-backend-m5m4.onrender.com/api/v1/patient/renew-access-token",
         {},
         { withCredentials: true }
       );
 
-      // backend should return { success: true, data: { accesstoken: "..." } }
       const newAccessToken = refreshRes?.data?.data?.accesstoken;
-      if (!newAccessToken) {
-        throw new Error("No access token in refresh response");
-      }
+      if (!newAccessToken) throw new Error("No access token returned on refresh");
 
-      // set default header for future requests
+      // Set header for all future requests
       api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
 
-      // resolve queued requests
+      // Process queued requests
       processQueue(null, newAccessToken);
       isRefreshing = false;
 
-      // set header on original and retry
+      // Retry original request
       originalRequest.headers = originalRequest.headers || {};
       originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
       return api(originalRequest);
     } catch (refreshError) {
-      // fail queue
       processQueue(refreshError, null);
       isRefreshing = false;
 
-      // optional: if refresh returns 401, you might want to dispatch logout here
-      // e.g., store.dispatch(logoutAction());
       return Promise.reject(refreshError);
     }
   }

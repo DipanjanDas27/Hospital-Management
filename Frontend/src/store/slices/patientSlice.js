@@ -99,8 +99,13 @@ const patientSlice = createSlice({
 
     builder.addMatcher(isRejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload;
+
+      const payload = action.payload;
+      if (payload?.message) state.error = payload.message;
+      else if (typeof payload === "string") state.error = payload;
+      else state.error = "Something went wrong";
     });
+
 
   }
 });

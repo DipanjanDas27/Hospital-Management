@@ -12,14 +12,26 @@ export const registerPatient = createAsyncThunk("patient/register", async (formD
 });
 
 
-export const loginPatient = createAsyncThunk("patient/login", async (payload, { rejectWithValue }) => {
-  try {
-    const res = await api.post("/login", payload);
-    return res.data;
-  } catch (err) {
-    return rejectWithValue(err.response?.data || err.message);
+export const loginPatient = createAsyncThunk(
+  "patient/login",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/login", payload);
+
+      // ⭐ VERY IMPORTANT ⭐
+      // Attach the access token to axios for all future requests
+      const accessToken = res.data?.data?.accesstoken;
+      if (accessToken) {
+        api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+      }
+
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
   }
-});
+);
+
 
 export const logoutPatient = createAsyncThunk("patient/logout", async (_, { rejectWithValue }) => {
   try {
