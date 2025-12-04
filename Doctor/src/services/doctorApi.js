@@ -175,10 +175,24 @@ export const resetForgottenPassword = createAsyncThunk(
         }
     }
 );
+const hasRefreshCookie = () => {
+    try {
+        return document.cookie.split(";").some((c) => c.trim().startsWith("refreshToken="));
+    } catch {
+        return false;
+    }
+};
 export const getCurrentDoctor = createAsyncThunk(
     "doctor/getCurrentDoctorForDoctor",
     async (_, { rejectWithValue }) => {
         try {
+            if (hasRefreshCookie()) {
+                try {
+                    await api.post("/renew-access-token", {}, { withCredentials: true, timeout: 8000 });
+                } catch (e) {
+                    console.debug("startup: renew failed (ok to ignore):", e?.response?.data || e.message);
+                }
+            }
             const res = await api.get("get-doctor");
             return res.data.data;
         } catch (error) {
