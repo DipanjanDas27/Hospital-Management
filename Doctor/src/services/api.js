@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://hms-backend-m5m4.onrender.com/api/v1/doctor",
+  baseURL: "https://backend-rose-six-eyc7qvg7ik.vercel.app/api/v1/doctor",
   withCredentials: true,
 });
 
@@ -73,7 +73,7 @@ api.interceptors.response.use(
 
     try {
       const refreshRes = await axios.post(
-        "https://hms-backend-m5m4.onrender.com/api/v1/doctor/renew-access-token",
+        "https://backend-rose-six-eyc7qvg7ik.vercel.app/api/v1/doctor/renew-access-token",
         {},
         { withCredentials: true }
       );
