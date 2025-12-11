@@ -8,6 +8,7 @@ const app = express()
 const allowedOrigins = [
     process.env.CORS_ORIGIN_DOCTOR,
     process.env.CORS_ORIGIN_PATIENT,
+    process.env.CORS_ORIGIN_ADMIN,
 ];
 
 app.use(
@@ -64,3 +65,4 @@ app.use((err, req, res, next) => {
 });
 
 export { app }
+export default app;

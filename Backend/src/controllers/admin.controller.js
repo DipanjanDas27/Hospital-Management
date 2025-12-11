@@ -136,7 +136,9 @@ const loginadmin = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "None",
+        path: "/",
     }
     return res
         .status(200)
@@ -152,6 +154,9 @@ const logoutadmin = asyncHandler(async (req, res, next) => {
     const options = {
         httpOnly: true,
         secure: true,
+        sameSite: "None",
+        path: "/"
+
     }
     return res
         .status(200)
@@ -182,7 +187,9 @@ const accesstokenrenewal = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "None",
+        path: "/",
     }
     return res
         .status(200)
@@ -290,4 +297,11 @@ const updateprofilepic = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, updatedadmin, "profilepicture updated successfully"))
 })
 
-export { registeradmin, loginadmin, logoutadmin, updateprofile, updatepassword, resetForgottenPassword, getprofiledetails, accesstokenrenewal, updateprofilepic } 
+const getCurrentAdmin = asyncHandler(async (req, res) => {
+    const admin = await Admin.findById(req.admin?._id).select("-password -refreshtoken -adminsecret");
+    if (!admin) {
+        throw new apiError(404, "Admin not found");
+    }
+    return res.status(200).json(new apiResponse(200, admin, "Current admin fetched successfully"));
+});
+export { registeradmin, loginadmin, logoutadmin, updateprofile, updatepassword, resetForgottenPassword, getprofiledetails, accesstokenrenewal, updateprofilepic, getCurrentAdmin }; 

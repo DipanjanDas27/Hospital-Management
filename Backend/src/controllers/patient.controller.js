@@ -6,7 +6,7 @@ import { apiResponse } from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
 import sendMail from '../services/mail.js';
 import { welcomeemailtemplate, logintemplate } from '../utils/emailtemplate.js';
-import path from 'path';
+
 
 const generateaccesstokenandrefreshtoken = async (patientId) => {
     try {
