@@ -5,7 +5,7 @@ import { verifyadmin } from '../middlewares/adminauth.middleware.js';
 import { verifyTempjwt } from "../middlewares/verifytempjwt.middleware.js";
 import { sendotp, sendForgetPasswordOtp, verifyotp, verifyForgotPasswordOtp } from "../controllers/otp.controller.js";
 import { getallappointmentforadmin,getappointment,gettodayappointment } from "../controllers/appointment.controller.js";
-import { getalldoctorprofiledetails, getdoctorprofiledetails } from "../controllers/doctor.controller.js";
+import { getalldoctorprofiledetails, getdoctorbydept, getdoctorprofiledetails } from "../controllers/doctor.controller.js";
 import { createDepartment, getAllDepartments, updateDepartment } from "../controllers/department.controller.js";
 
 const router = Router();
@@ -53,6 +53,7 @@ router.route("/appointments").get(verifyadmin, getallappointmentforadmin);
 router.route("/appointments/:appointmentid").get(verifyadmin, getappointment);
 router.route("/doctors").get(verifyadmin, getalldoctorprofiledetails);
 router.route("/doctors/:doctorid").get(verifyadmin, getdoctorprofiledetails);
+router.route("/departments/:deptname/doctors").get(verifyadmin,getdoctorbydept);
 
 router.route("/create-department").post(verifyadmin,createDepartment);
 router.route("/departments").get(verifyadmin,getAllDepartments);

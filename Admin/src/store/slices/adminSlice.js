@@ -20,7 +20,8 @@ import {
   adminCreateDepartment,
   adminGetAllDepartments,
   adminUpdateDepartment,
-  getAppointments
+  getAppointments,
+  adminGetDoctorsByDepartment
 } from "@/services/adminApi";
 
 
@@ -122,7 +123,9 @@ const adminSlice = createSlice({
     builder.addCase(adminGetDoctorDetails.fulfilled, (state, action) => {
       state.doctorDetails = action.payload;
     });
-
+    builder.addCase(adminGetDoctorsByDepartment.fulfilled, (state, action) => {
+      state.doctors = action.payload;
+    });
     /* ---------------- DEPARTMENTS ---------------- */
     builder.addCase(adminGetAllDepartments.fulfilled, (state, action) => {
       state.departments = action.payload;

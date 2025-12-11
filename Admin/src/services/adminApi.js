@@ -202,7 +202,17 @@ export const adminGetAllDoctors = createAsyncThunk(
         }
     }
 );
-
+ export const adminGetDoctorsByDepartment = createAsyncThunk(
+    "admin/doctorsByDepartment",
+    async (deptname, { rejectWithValue }) => {
+        try {
+            const res = await api.get(`/departments/${deptname}/doctors`);
+            return res.data.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data || err.message);
+        }
+    }
+);
 
 export const adminGetDoctorDetails = createAsyncThunk(
     "admin/doctorDetails",
@@ -252,7 +262,7 @@ export const adminUpdateDepartment = createAsyncThunk(
     }
 );
 export const getAdmin = createAsyncThunk(
-    "admin/getProfile",
+    "admin/getAdmin",
     async (_, { rejectWithValue }) => {
         try {
             const res = await api("/get-admin");

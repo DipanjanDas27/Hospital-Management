@@ -10,6 +10,8 @@ import AdminDashboard from './components/custom/AdminDashboard'
 import AdminLogin from './pages/AdminLogin'
 import AdminAppointmentsPage from './pages/AdminAppointmentPage'
 import AppointmentDetails from './pages/AppointmentDetails'
+import AdminDoctorProfile from './pages/doctorprofile'
+import DoctorList from './pages/DoctorsList'
 
 const router = createBrowserRouter([
   {
@@ -48,24 +50,64 @@ const router = createBrowserRouter([
         path: '/appointments',
         element: (
           <AuthLayout authentication={true}>
-            < AdminAppointmentsPage/>
+            < AdminAppointmentsPage />
           </AuthLayout>
         )
       },
-      
-      // {
-      //   path: '/profile/updateprofile',
-      //   element: (
-      //     <AuthLayout authentication={true}>
-      //       <UpdateProfile />
-      //     </AuthLayout>
-      //   )
-      // },
+
+      {
+        path: '/departments',
+        element:
+          (<AuthLayout authentication={true}>
+            <DepartmentList />
+          </AuthLayout>
+          ),
+      },
+      {
+        path: "/departments/:deptname/doctors",
+        element: (
+          <AuthLayout authentication={true}>
+            <DoctorList />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: '/doctors',
+        element:
+          (<AuthLayout authentication={true}>
+            <DoctorList />
+          </AuthLayout>
+          )
+      },
+      {
+        path: "/departments/:deptname/doctors/:doctorid",
+        element: (
+          <AuthLayout authentication={true}>
+            <AdminDoctorProfile />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/doctors/:doctorid",
+        element: (
+          <AuthLayout authentication={true}>
+            <AdminDoctorProfile />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: '/profile/updateprofile',
+        element: (
+          <AuthLayout authentication={true}>
+            <UpdateProfile />
+          </AuthLayout>
+        )
+      },
       // {
       //   path: '/profile',
       //   element: (
       //     <AuthLayout authentication={true}>
-      //       <DoctorProfile />
+      //       <AdminDoctorProfile />
       //     </AuthLayout>
       //   )
       // },

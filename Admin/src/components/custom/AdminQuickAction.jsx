@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { ClipboardList, Users, Building2, FileText } from "lucide-react";
 
 const actions = [
-  { label: "All Appointments", icon: ClipboardList, path: "/admin/appointments" },
-  { label: "Doctor Profiles", icon: Users, path: "/admin/doctors" },
-  { label: "Departments", icon: Building2, path: "/admin/departments" },
-  { label: "Prescriptions", icon: FileText, path: "/admin/prescriptions" },
+  { label: "All Appointments", icon: ClipboardList, path: "/appointments" },
+  { label: "Doctor Profiles", icon: Users, path: "/doctors" },
+  { label: "Departments", icon: Building2, path: "/departments" },
+  { label: "My Profile", icon: FileText, path: "/profile" },
 ];
 
 const AdminQuickActions = () => {

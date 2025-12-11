@@ -50,7 +50,7 @@ const AdminLogin = () => {
 
     if (res.meta.requestStatus === "fulfilled") {
       toast.success("Login Successful!");
-      navigate("/admin/dashboard");
+      navigate("/");
     } else {
       toast.error(res.payload?.message || "Login failed!");
     }
