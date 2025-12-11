@@ -20,7 +20,9 @@ import {
   adminCreateDepartment,
   adminGetAllDepartments,
   adminUpdateDepartment,
+  getAppointments
 } from "@/services/adminApi";
+
 
 const initialState = {
   admin: null,
@@ -30,15 +32,9 @@ const initialState = {
 
   todayAppointments: [],
   allAppointments: [],
+  appointmentDetails: null,
   doctors: [],
   doctorDetails: null,
-
-  prescriptions: [],
-  prescriptionDetails: null,
-
-  labtests: [],
-  labtestDetails: null,
-
   departments: [],
 
   // Password flows
@@ -113,6 +109,9 @@ const adminSlice = createSlice({
 
     builder.addCase(adminGetAllAppointments.fulfilled, (state, action) => {
       state.allAppointments = action.payload;
+    });
+    builder.addCase(getAppointments.fulfilled, (state, action) => {
+      state.appointmentDetails = action.payload;
     });
 
     /* ---------------- DOCTOR MANAGEMENT ---------------- */

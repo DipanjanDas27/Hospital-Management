@@ -179,6 +179,17 @@ export const adminGetAllAppointments = createAsyncThunk(
         }
     }
 );
+export const getAppointments = createAsyncThunk(
+    "admin/getAppointment",
+    async (appointmentid, { rejectWithValue }) => {
+        try {
+            const res = await api.get(`/appointments/${appointmentid}`);
+            return res.data.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data || err.message);
+        }
+    }
+);
 
 export const adminGetAllDoctors = createAsyncThunk(
     "admin/allDoctors",
@@ -237,6 +248,17 @@ export const adminUpdateDepartment = createAsyncThunk(
             return res.data.data;
         } catch (err) {
             return rejectWithValue(err.response?.data || err.message);
+        }
+    }
+);
+export const getAdmin = createAsyncThunk(
+    "admin/getProfile",
+    async (_, { rejectWithValue }) => {
+        try {
+            const res = await api("/get-admin");
+            return res.data.data;
+        } catch (err) {
+            return rejectWithValue(null);
         }
     }
 );

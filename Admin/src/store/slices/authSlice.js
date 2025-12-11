@@ -3,8 +3,8 @@ import {
     adminRegister,
     adminLogin,
     adminLogout,
-    adminGetProfile,
-} from "@/services/admin/adminAuthApi";
+} from "@/services/adminApi";
+import { getAdmin } from "@/services/adminApi";
 
 const initialState = {
     user: null,
@@ -15,22 +15,25 @@ const initialState = {
 };
 
 const adminAuthSlice = createSlice({
-    name: "adminAuth",
+    name: "auth",
     initialState,
     reducers: {
-        clearAdminAuthError: (state) => {
+        clearAuthState: (state) => {
             state.error = null;
         },
     },
 
     extraReducers: (builder) => {
-        // REGISTER
+
         builder.addCase(adminRegister.pending, (state) => {
             state.loading = true;
             state.error = null;
         });
         builder.addCase(adminRegister.fulfilled, (state) => {
             state.loading = false;
+            state.isAuthenticated = true;
+            state.isInitialized = true;
+            state.error = null;
         });
         builder.addCase(adminRegister.rejected, (state, action) => {
             state.loading = false;
@@ -45,7 +48,10 @@ const adminAuthSlice = createSlice({
         builder.addCase(adminLogin.fulfilled, (state, action) => {
             state.loading = false;
             state.isAuthenticated = true;
-            state.user = action.payload;
+            state.user = action.payload?.user;
+            state.isInitialized = true;
+            state.error = null;
+            
         });
         builder.addCase(adminLogin.rejected, (state, action) => {
             state.loading = false;
@@ -60,28 +66,33 @@ const adminAuthSlice = createSlice({
             state.loading = false;
             state.user = null;
             state.isAuthenticated = false;
+            state.isInitialized = false;
+            state.error = null;
         });
         builder.addCase(adminLogout.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload || "Logout failed";
         });
 
-        builder.addCase(adminGetProfile.pending, (state) => {
+        builder.addCase(getAdmin.pending, (state) => {
             state.loading = true;
         });
-        builder.addCase(adminGetProfile.fulfilled, (state, action) => {
+        builder.addCase(getAdmin.fulfilled, (state, action) => {
             state.loading = false;
             state.user = action.payload;
             state.isAuthenticated = true;
+            state.isInitialized = true;
+            state.error = null;
         });
-        builder.addCase(adminGetProfile.rejected, (state, action) => {
+        builder.addCase(getAdmin.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload || "Failed to load profile";
+            state.isInitialized = true;
         });
-
+        
 
     },
 });
 
-export const { clearAdminAuthError } = adminAuthSlice.actions;
+export const { clearAuthState } = adminAuthSlice.actions;
 export default adminAuthSlice.reducer;

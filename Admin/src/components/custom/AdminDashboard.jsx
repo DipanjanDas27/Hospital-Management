@@ -1,7 +1,7 @@
 import React from "react";
 import AdminHeader from "./AdminHeader";
 import AdminStats from "./AdminStats";
-import AdminQuickActions from "./AdminQuickActions";
+import AdminQuickActions from "./AdminQuickAction";
 import AdminUpcomingAppointments from "./AdminUpcomingAppointments"; // NEW COMPONENT
 
 const AdminDashboard = () => {
