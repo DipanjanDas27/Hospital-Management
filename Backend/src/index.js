@@ -1,11 +1,10 @@
 import connectdb from "./db/index.js";
 import dotenv from "dotenv";
-import app from "./app.js";
+import { app } from "./app.js";
 
 dotenv.config();
 
-// connect DB once
-await connectdb();
-
-// export express handler for Vercel
-export default app;
+export default async function handler(req, res) {
+    await connectdb();   // ensures DB is connected once
+    return app(req, res);
+}
