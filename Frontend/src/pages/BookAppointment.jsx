@@ -97,6 +97,7 @@ const BookAppointment = () => {
 
       if (res.meta.requestStatus === "fulfilled") {
         toast.success("Appointment booked successfully!");
+        navigate("/appointments");
         reset();
         setSelectedTime("");
         setSelectedDate(null);
