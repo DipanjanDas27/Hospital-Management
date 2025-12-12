@@ -12,6 +12,10 @@ import AdminAppointmentsPage from './pages/AdminAppointmentPage'
 import AppointmentDetails from './pages/AppointmentDetails'
 import AdminDoctorProfile from './pages/doctorprofile'
 import DoctorList from './pages/DoctorsList'
+import AdminDepartmentList from './pages/DepartmentList'
+import AdminSendOtp from './pages/SendOtp'
+import AdminResetPassword from './pages/ResetPassword'
+import AdminVerifyOtp from './pages/VerifyOtp'
 
 const router = createBrowserRouter([
   {
@@ -59,7 +63,7 @@ const router = createBrowserRouter([
         path: '/departments',
         element:
           (<AuthLayout authentication={true}>
-            <DepartmentList />
+            <AdminDepartmentList />
           </AuthLayout>
           ),
       },
@@ -103,31 +107,31 @@ const router = createBrowserRouter([
           </AuthLayout>
         )
       },
-      // {
-      //   path: '/profile',
-      //   element: (
-      //     <AuthLayout authentication={true}>
-      //       <AdminDoctorProfile />
-      //     </AuthLayout>
-      //   )
-      // },
+      {
+        path: '/profile',
+        element: (
+          <AuthLayout authentication={true}>
+            <AdminDoctorProfile />
+          </AuthLayout>
+        )
+      },
 
-      // {
-      //   path: '/update-password',
-      //   element: <SendOtp />
-      // },
-      // {
-      //   path: '/verify-otp',
-      //   element: <VerifyOtp />
-      // },
-      // {
-      //   path: '/reset-password',
-      //   element: <ResetPassword />
-      // },
-      // {
-      //   path: '/forgot-password',
-      //   element: <SendOtp />
-      // },
+      {
+        path: '/update-password',
+        element: <AdminSendOtp />
+      },
+      {
+        path: '/verify-otp',
+        element: <AdminVerifyOtp />
+      },
+      {
+        path: '/reset-password',
+        element: <AdminResetPassword />
+      },
+      {
+        path: '/forgot-password',
+        element: <AdminSendOtp />
+      },
 
     ],
   },

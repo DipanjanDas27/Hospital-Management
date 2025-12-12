@@ -1,72 +1,99 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Building2, 
-  ArrowRight, 
-  Stethoscope,
-  Users
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Pencil, Trash2, Stethoscope } from "lucide-react";
+import UpdateDepartmentModal from "./UpdateDepartmentModal";
+import DeleteDepartmentModal from "./DeleteDepartmentModal";
 
-// Map department names to appropriate icons (customize as needed)
 const departmentIcons = {
-  cardiology: "❤️",
-  neurology: "🧠",
-  orthopedics: "🦴",
-  pediatrics: "👶",
-  dermatology: "✨",
-  general: "🏥",
-  emergency: "🚨",
-  surgery: "⚕️",
+  "General Medicine": "🏥",
+  Cardiology: "❤️",
+  Neurology: "🧠",
+  Orthopedics: "🦴",
+  Pediatrics: "👶",
+  Dermatology: "✨",
+  Gynecology: "🤰",
+  Ophthalmology: "👁️",
+  ENT: "👂",
+  Psychiatry: "🧘",
 };
 
-function DepartmentCard({ name, description, onClick }) {
-  // Get icon for department or use default
-  const icon = departmentIcons[name?.toLowerCase()] || "🏥";
+function AdminDepartmentCard({ dept, onClick }) {
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+  const icon = departmentIcons[dept.deptname] || "🏥";
 
   return (
-    <Card
-      onClick={onClick}
-      className="group cursor-pointer overflow-hidden border-0 shadow-md hover:shadow-2xl transition-all duration-300 bg-white h-full"
-    >
-      <CardContent className="p-6 relative">
-        {/* Background Gradient Decoration */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        <div className="relative space-y-4">
-          {/* Icon Section */}
-          <div className="flex items-start justify-between">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+    <>
+      <Card className="group cursor-pointer overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white h-full">
+        <CardContent className="p-6 relative">
+
+          {/* Glow Background */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-indigo-200 via-purple-200 to-pink-200 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          <div className="relative space-y-4" onClick={onClick}>
+            {/* Icon */}
+            <div className="w-16 h-16 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-3xl text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
               {icon}
             </div>
-            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" />
-          </div>
 
-          {/* Content */}
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold text-gray-900 capitalize group-hover:text-blue-600 transition-colors duration-300">
-              {name}
+            {/* Department Name */}
+            <h3 className="text-xl font-bold text-gray-900 capitalize group-hover:text-indigo-600 transition-colors duration-300">
+              {dept.deptname}
             </h3>
-            
-            <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-              {description || "Explore our specialized doctors in this department with expert care."}
+
+            {/* Description */}
+            <p className="text-sm text-gray-600 line-clamp-3">
+              {dept.description || "No description provided."}
             </p>
+
+            <div className="pt-3 border-t border-gray-100">
+              <Badge className="text-xs gap-1 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white">
+                <Stethoscope className="w-3 h-3" />
+                View Specialists
+              </Badge>
+            </div>
           </div>
 
-          {/* Footer Badge */}
-          <div className="pt-3 border-t border-gray-100">
-            <Badge variant="secondary" className="text-xs gap-1">
-              <Stethoscope className="w-3 h-3" />
-              View Specialists
-            </Badge>
-          </div>
-        </div>
+          {/* Action Buttons */}
+          <div className="mt-4 flex justify-between gap-3">
+            <Button
+              size="sm"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowUpdateModal(true);
+              }}
+            >
+              <Pencil className="w-4 h-4 mr-1" />
+              Update
+            </Button>
 
-        {/* Hover Border Effect */}
-        <div className="absolute inset-0 border-2 border-blue-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-      </CardContent>
-    </Card>
+            <Button
+              size="sm"
+              variant="destructive"
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteModal(true);
+              }}
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* MODALS */}
+      <UpdateDepartmentModal
+        open={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        dept={dept}
+      />
+    </>
   );
 }
 
-export default DepartmentCard;
+export default AdminDepartmentCard;

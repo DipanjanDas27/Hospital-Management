@@ -1,78 +1,86 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getAllDepartments } from "@/services/patientApi";
+import { adminGetAllDepartments } from "@/services/adminApi";
 import { useNavigate } from "react-router-dom";
-import DepartmentCard from "../components/custom/DepartmentCard";
+
+import AdminDepartmentCard from "@/components/custom/AdminDepartmentCard";
 import { Loader2, Building2, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-function DepartmentList() {
+function AdminDepartmentList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { departments, loading, error } = useSelector((state) => state.patient);
+
+  const { departments, loading, error } = useSelector((state) => state.admin);
 
   useEffect(() => {
-    dispatch(getAllDepartments());
+    dispatch(adminGetAllDepartments());
   }, [dispatch]);
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-[60vh] bg-gray-50">
-        <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-        <p className="text-gray-600 font-medium">Loading departments...</p>
+      <div className="flex flex-col justify-center items-center min-h-[60vh] bg-white">
+        <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+        <p className="text-gray-700 font-medium">Loading departments...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-[60vh] bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-[60vh] bg-white flex items-center justify-center p-4">
         <Alert variant="destructive" className="max-w-md">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{error?.message || "Failed to load departments."}</AlertDescription>
         </Alert>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12">
       <div className="container mx-auto px-4 lg:px-8">
-        {/* Header Section */}
+
+        {/* Header */}
         <div className="text-center mb-12">
-          <Badge variant="secondary" className="mb-4">
+          <Badge
+            variant="secondary"
+            className="mb-4 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white"
+          >
             <Building2 className="w-3 h-3 mr-1" />
-            Medical Departments
+            Departments
           </Badge>
+
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Our Departments
+            Hospital Departments
           </h1>
+
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Explore our specialized medical departments with expert doctors and 
-            state-of-the-art facilities dedicated to your health and wellbeing.
+            Explore all medical departments managed under NovaMed Administration.
           </p>
-          <div className="mt-4">
-            <p className="text-sm text-gray-500">
-              Total Departments: <span className="font-semibold text-blue-600">{departments?.length || 0}</span>
-            </p>
-          </div>
+
+          <p className="text-sm text-gray-500 mt-3">
+            Total Departments:{" "}
+            <span className="font-semibold text-indigo-700">{departments?.length || 0}</span>
+          </p>
         </div>
 
-        {/* Departments Grid */}
+        {/* Department Grid */}
         {departments?.length === 0 ? (
           <div className="text-center py-12">
             <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No departments available at the moment.</p>
+            <p className="text-gray-500 text-lg">No departments available.</p>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {departments.map((dept) => (
-              <DepartmentCard
+              <AdminDepartmentCard
                 key={dept._id}
-                name={dept.deptname}
-                description={dept.description}
-                onClick={() => navigate(`/departments/${dept.deptname.toLowerCase()}/doctors`)}
+                dept={dept}
+                onClick={() =>
+                  navigate(`/departments/${dept.deptname.toLowerCase()}/doctors`)
+                }
               />
             ))}
           </div>
@@ -82,4 +90,4 @@ function DepartmentList() {
   );
 }
 
-export default DepartmentList;
+export default AdminDepartmentList;
