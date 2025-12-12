@@ -1,22 +1,20 @@
-import createTransporter from './nodemailer.js';
+import resend from "./resend.js";
 
-const SENDER_EMAIL = process.env.SENDER_EMAIL;
+const SENDER_EMAIL = process.env.SENDER_EMAIL;  
 
 const sendMail = async ({ to, subject, html }) => {
   try {
-    const transporter = await createTransporter();
-
-    const mailOptions = {
+    const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to,
       subject,
       html,
-    };
+    });
 
-    const result = await transporter.sendMail(mailOptions);
     return result;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error("Resend Email Error:", error);
+    throw new Error("Failed to send email");
   }
 };
 
