@@ -16,6 +16,8 @@ import AdminDepartmentList from './pages/DepartmentList'
 import AdminSendOtp from './pages/SendOtp'
 import AdminResetPassword from './pages/ResetPassword'
 import AdminVerifyOtp from './pages/VerifyOtp'
+import AdminRegister from './pages/AdminRegister'
+import AdminUpdateProfile from './pages/UpdateProfile'
 
 const router = createBrowserRouter([
   {
@@ -30,10 +32,10 @@ const router = createBrowserRouter([
         path: '/login',
         element: <AdminLogin />
       },
-      // {
-      //   path: '/register',
-      //   element: <DoctorRegister />
-      // }, 
+      {
+        path: '/register',
+        element: <AdminRegister />
+      }, 
       {
         path: '/appointments/:appointmentid',
         element: (
@@ -103,7 +105,7 @@ const router = createBrowserRouter([
         path: '/profile/updateprofile',
         element: (
           <AuthLayout authentication={true}>
-            <UpdateProfile />
+            <AdminUpdateProfile />
           </AuthLayout>
         )
       },

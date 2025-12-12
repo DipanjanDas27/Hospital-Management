@@ -3,8 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Stethoscope } from "lucide-react";
-import UpdateDepartmentModal from "./UpdateDepartmentModal";
-import DeleteDepartmentModal from "./DeleteDepartmentModal";
+import UpdateDepartmentModal from "./UpdatedepartmentModal";
 
 const departmentIcons = {
   "General Medicine": "🏥",

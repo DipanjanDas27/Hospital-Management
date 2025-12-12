@@ -1,9 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import ShiftManagement from "./ShiftManagement";
+
 import {
   Card,
   CardContent,
@@ -11,49 +11,42 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { registerDoctor } from "@/services/doctorApi";
+import { adminRegister } from "@/services/adminApi";
+
 import {
   Loader2,
-  Building2,
   Upload,
-  Stethoscope,
+  Shield,
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
-import { useState } from "react";
 
-const DoctorRegister = () => {
+const AdminRegister = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const { loading, error } = useSelector((state) => state.auth);
-  const [shifts, setShifts] = useState([]);
 
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     formState: { errors },
   } = useForm();
 
+  // Submit handler
   const onSubmit = async (data) => {
-    // Validate required documents
     if (
       !watch("aadhar") ||
-      !watch("medicallicense") ||
-      !watch("medicaldegree") ||
-      !watch("profilepicture")
+      !watch("adminId") ||
+      !watch("profilepicture") ||
+      !watch("appointmentletter")
     ) {
       toast.error("Please upload all required documents");
       return;
@@ -62,18 +55,18 @@ const DoctorRegister = () => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => formData.append(key, value));
 
+    // Append files
     formData.append("aadhar", watch("aadhar")[0]);
-    formData.append("medicallicense", watch("medicallicense")[0]);
-    formData.append("medicaldegree", watch("medicaldegree")[0]);
+    formData.append("adminId", watch("adminId")[0]);
     formData.append("profilepicture", watch("profilepicture")[0]);
-
-    formData.append("shift", JSON.stringify(shifts));
+    formData.append("appointmentletter", watch("appointmentletter")[0]);
 
     try {
-      const res = await dispatch(registerDoctor(formData));
+      const res = await dispatch(adminRegister(formData));
+
       if (res.meta.requestStatus === "fulfilled") {
-        toast.success("Registration successful!");
-        navigate("/");
+        toast.success("Admin Registered Successfully!");
+        navigate("/admin/login");
       } else {
         toast.error(res.payload?.message || "Registration failed!");
       }
@@ -84,24 +77,24 @@ const DoctorRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-teal-50 via-emerald-50 to-cyan-50 py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 py-14 px-4">
+      <div className="max-w-4xl mx-auto">
 
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-linear-to-br from-teal-600 to-emerald-700 rounded-lg flex items-center justify-center shadow-lg">
-              <Stethoscope className="w-7 h-7 text-white" />
+            <div className="w-12 h-12 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Shield className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">NovaMed</h1>
+            <h1 className="text-3xl font-bold text-gray-900">NovaMed Admin Portal</h1>
           </div>
-          <p className="text-gray-600">Register as a Medical Professional</p>
+          <p className="text-gray-600">Register as an administrator</p>
         </div>
 
         <Card className="shadow-xl border-0">
           <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl font-bold">Doctor Registration</CardTitle>
-            <CardDescription>Join our healthcare network</CardDescription>
+            <CardTitle className="text-2xl font-bold">Admin Registration</CardTitle>
+            <CardDescription>Authorized Personal Only</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -114,236 +107,167 @@ const DoctorRegister = () => {
                 </Alert>
               )}
 
-              {/* All Input Fields */}
+              {/* ADMIN INPUT FIELDS */}
               <div className="grid md:grid-cols-2 gap-6">
 
                 {/* Full Name */}
-                <div className="space-y-2">
-                  <Label>Full Name *</Label>
-                  <Input
-                    placeholder="Dr. Arjun Rao"
-                    {...register("doctorname", { required: "Name required" })}
-                    className={errors.doctorname ? "border-red-500" : ""}
-                  />
-                </div>
+                <FormBox
+                  label="Full Name *"
+                  placeholder="Admin Name"
+                  register={register("adminname", { required: "Name required" })}
+                  error={errors.adminname}
+                />
 
                 {/* Username */}
-                <div className="space-y-2">
-                  <Label>Username *</Label>
-                  <Input
-                    placeholder="arjun_rao"
-                    {...register("doctorusername", {
-                      required: "Username required",
-                      pattern: {
-                        value: /^[a-zA-Z0-9_]+$/,
-                        message: "Only letters, numbers & _ allowed"
-                      }
-                    })}
-                    className={errors.doctorusername ? "border-red-500" : ""}
-                  />
-                </div>
+                <FormBox
+                  label="Username *"
+                  placeholder="admin_001"
+                  register={register("adminusername", {
+                    required: "Username required",
+                  })}
+                  error={errors.adminusername}
+                />
 
                 {/* Email */}
-                <div className="space-y-2">
-                  <Label>Email *</Label>
-                  <Input
-                    type="email"
-                    placeholder="doctor@email.com"
-                    {...register("email", { required: "Email required" })}
-                    className={errors.email ? "border-red-500" : ""}
-                  />
-                </div>
+                <FormBox
+                  label="Email *"
+                  placeholder="admin@novamed.com"
+                  type="email"
+                  register={register("email", { required: "Email required" })}
+                  error={errors.email}
+                />
 
-                {/* Phone */}
-                <div className="space-y-2">
-                  <Label>Phone Number *</Label>
-                  <Input
-                    placeholder="9876543210"
-                    {...register("phonenumber", { required: "Phone required" })}
-                    className={errors.phonenumber ? "border-red-500" : ""}
-                  />
-                </div>
+                {/* Phone Number */}
+                <FormBox
+                  label="Phone Number *"
+                  placeholder="9876543210"
+                  register={register("phonenumber", { required: "Phone required" })}
+                  error={errors.phonenumber}
+                />
 
                 {/* Password */}
-                <div className="space-y-2">
-                  <Label>Password *</Label>
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    {...register("password", { required: "Password required" })}
-                    className={errors.password ? "border-red-500" : ""}
-                  />
-                </div>
+                <FormBox
+                  label="Password *"
+                  type="password"
+                  placeholder="Password"
+                  register={register("password", { required: "Password required" })}
+                  error={errors.password}
+                />
 
-                {/* Age */}
-                <div className="space-y-2">
-                  <Label>Age *</Label>
-                  <Input
-                    type="number"
-                    placeholder="38"
-                    {...register("age", { required: "Age required" })}
-                    className={errors.age ? "border-red-500" : ""}
-                  />
-                </div>
-
-                {/* Gender */}
-                <div className="space-y-2">
-                  <Label>Sex *</Label>
-                  <Select onValueChange={(v) => setValue("sex", v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" className="bg-white" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Male" className="hover:bg-teal-50">Male</SelectItem>
-                      <SelectItem value="Female" className="hover:bg-teal-50">Female</SelectItem>
-                      <SelectItem value="Other" className="hover:bg-teal-50">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <input type="hidden" {...register("sex", { required: "Sex required" })} />
-                </div>
-
-                {/* Qualification */}
-                <div className="space-y-2">
-                  <Label>Qualification *</Label>
-                  <Input
-                    placeholder="MBBS, MD"
-                    {...register("qualification", { required: "Required" })}
-                    className={errors.qualification ? "border-red-500" : ""}
-                  />
-                </div>
-
-                {/* Experience */}
-                <div className="space-y-2">
-                  <Label>Experience *</Label>
-                  <Input
-                    type="number"
-                    placeholder="10"
-                    {...register("experience", { required: "Required" })}
-                    className={errors.experience ? "border-red-500" : ""}
-                  />
-                </div>
-
-                {/* Department */}
-                <div className="space-y-2"> <Label htmlFor="department"> <Building2 className="w-4 h-4 text-gray-500 inline mr-2" /> Department * </Label> <Select onValueChange={(value) => setValue("department", value)}> <SelectTrigger className="bg-white border-gray-300"> <SelectValue placeholder="Select department" /> </SelectTrigger> <SelectContent className="bg-white">
-                  <SelectItem value="General Medicine" className="hover:bg-teal-50">General Medicine</SelectItem>
-                  <SelectItem value="Cardiology" className="hover:bg-teal-50">Cardiology</SelectItem> <SelectItem value="Neurology" className="hover:bg-teal-50">Neurology</SelectItem> <SelectItem value="Orthopedics" className="hover:bg-teal-50">Orthopedics</SelectItem> <SelectItem value="Pediatrics" className="hover:bg-teal-50">Pediatrics</SelectItem> <SelectItem value="Dermatology" className="hover:bg-teal-50">Dermatology</SelectItem> <SelectItem value="Gynecology" className="hover:bg-teal-50">Gynecology</SelectItem>
-                  <SelectItem value="Ophthalmology" className="hover:bg-teal-50">Ophthalmology</SelectItem>
-                  <SelectItem value="ENT" className="hover:bg-teal-50">ENT</SelectItem>
-                  <SelectItem value="Psychiatry" className="hover:bg-teal-50">Psychiatry</SelectItem>
-                  <SelectItem value="Gastroenterology" className="hover:bg-teal-50">Gastroenterology</SelectItem>
-                  <SelectItem value="Urology" className="hover:bg-teal-50">Urology</SelectItem>
-                  <SelectItem value="Pulmonology" className="hover:bg-teal-50">Pulmonology</SelectItem>
-                </SelectContent>
-                </Select>
-                  <input type="hidden"
-                    {...register("department", { required: "Department is required" })} />
-                  {errors.department &&
-                    (<p className="text-red-500 text-xs flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.department.message}
-                    </p>)}
-                </div>
-
-                {/* Specialization */}
-                <div className="space-y-2">
-                  <Label>Specialization (Optional)</Label>
-                  <Input placeholder="e.g., Stroke Specialist" {...register("specialization")} />
-                </div>
-
-                {/* Shift Management */}
-                <ShiftManagement shifts={shifts} onChange={setShifts} />
-
+                {/* Admin Secret */}
+                <FormBox
+                  label="Admin Secret Key *"
+                  type="password"
+                  placeholder="Enter secret key"
+                  register={register("adminsecret", { required: "Admin secret required" })}
+                  error={errors.adminsecret}
+                />
               </div>
 
-              {/* FILE UPLOAD SECTION */}
+              {/* DOCUMENT UPLOAD SECTION */}
               <div className="space-y-6 border-t pt-6">
 
-                {/* Aadhar */}
                 <UploadBox
                   id="aadhar-doc"
                   label="Aadhar Card *"
                   file={watch("aadhar")}
-                  onChange={(e) => setValue("aadhar", e.target.files)}
+                  onChange={(e) => register("aadhar", {})(e)}
                 />
 
-                {/* Medical License */}
                 <UploadBox
-                  id="license-doc"
-                  label="Medical License *"
-                  file={watch("medicallicense")}
-                  onChange={(e) => setValue("medicallicense", e.target.files)}
+                  id="adminid-doc"
+                  label="Admin ID Card *"
+                  file={watch("adminId")}
+                  onChange={(e) => register("adminId", {})(e)}
                 />
 
-                {/* Medical Certificate */}
                 <UploadBox
-                  id="certificate-doc"
-                  label="Medical Certificate *"
-                  file={watch("medicaldegree")}
-                  onChange={(e) => setValue("medicaldegree", e.target.files)}
-                />
-
-                {/* Profile Picture */}
-                <UploadBox
-                  id="profile-pic"
+                  id="pic-doc"
                   label="Profile Picture *"
                   file={watch("profilepicture")}
-                  onChange={(e) => setValue("profilepicture", e.target.files)}
+                  onChange={(e) => register("profilepicture", {})(e)}
+                />
+
+                <UploadBox
+                  id="appointment-doc"
+                  label="Appointment Letter *"
+                  file={watch("appointmentletter")}
+                  onChange={(e) => register("appointmentletter", {})(e)}
                 />
 
               </div>
 
-
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-linear-to-r from-teal-600 to-emerald-600 text-white"
+                className="w-full h-11 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white"
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Creating Account...
+                    Registering...
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-5 h-5 mr-2" />
-                    Register
+                    Register Admin
                   </>
                 )}
               </Button>
             </form>
+
             <div className="text-center pt-6 border-t mt-6">
               <p className="text-sm text-gray-600">
-                Already have an account?{" "}
+                Already an admin?{" "}
                 <Button
                   onClick={() => navigate("/login")}
-                  className="text-teal-600 hover:text-teal-700 font-semibold hover:underline"
+                  className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline"
+                  variant="ghost"
                 >
-                  Login here
+                  Login
                 </Button>
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Footer Note */}
         <p className="text-center text-xs text-gray-500 mt-6">
-          For medical professionals only. Unauthorized access is prohibited.
+          Authorized NovaMed administrators only.
         </p>
       </div>
-    </div >
+    </div>
   );
 };
+
+// Reusable Input Box
+const FormBox = ({ label, placeholder, type = "text", register, error }) => (
+  <div className="space-y-2">
+    <Label>{label}</Label>
+    <Input
+      type={type}
+      placeholder={placeholder}
+      {...register}
+      className={error ? "border-red-500" : ""}
+    />
+    {error && (
+      <p className="text-red-500 text-xs flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {error.message}
+      </p>
+    )}
+  </div>
+);
 
 // Reusable Upload Box
 const UploadBox = ({ id, label, file, onChange }) => (
   <div className="space-y-2">
     <Label className="text-base font-medium">{label}</Label>
-    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-500 transition-colors">
+    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-500 transition">
       <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
       <input type="file" id={id} className="hidden" onChange={onChange} />
-      <label htmlFor={id} className="cursor-pointer text-sm text-gray-600 hover:text-teal-600">
+      <label htmlFor={id} className="cursor-pointer text-sm text-gray-600 hover:text-indigo-600">
         {file ? (
-          <span className="text-teal-600 font-medium">✓ {file[0].name}</span>
+          <span className="text-indigo-600 font-medium">✓ {file[0].name}</span>
         ) : (
           "Click to upload"
         )}
@@ -353,4 +277,4 @@ const UploadBox = ({ id, label, file, onChange }) => (
   </div>
 );
 
-export default DoctorRegister;
+export default AdminRegister;
