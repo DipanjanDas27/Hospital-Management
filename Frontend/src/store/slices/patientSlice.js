@@ -103,7 +103,6 @@ const patientSlice = createSlice({
       const payload = action.payload;
       if (payload?.message) state.error = payload.message;
       else if (typeof payload === "string") state.error = payload;
-      else state.error = "Something went wrong";
     });
 
 

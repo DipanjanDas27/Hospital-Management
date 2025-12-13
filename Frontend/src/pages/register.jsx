@@ -40,7 +40,8 @@ import {
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.patient || {});
+  const { loading, error } = useSelector((state) => state.auth || {});
+  console.log(error)
 
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
