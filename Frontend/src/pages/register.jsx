@@ -116,7 +116,7 @@ const Register = () => {
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {error.message || "Registration failed. Please try again."}
+                    {error?.message}
                   </AlertDescription>
                 </Alert>
               )}
