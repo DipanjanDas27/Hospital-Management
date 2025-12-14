@@ -40,10 +40,10 @@ const registeradmin = asyncHandler(async (req, res) => {
     if (adminsecret !== process.env.ADMIN_SECRET) {
         throw new apiError(401, "Invalid admin secret")
     }
-    const aadharlocalpath = req.files?.aadhar?.[0]?.path;
-    const adminIdlocalpath = req.files?.adminId?.[0]?.path;
-    const profilepicturelocalpath = req.files?.profilepicture?.[0]?.path;
-    const appointmentletterlocalpath = req.files?.appointmentletter?.[0]?.path;
+    const aadharlocalpath = req.files?.aadhar?.[0]?.buffer;
+    const adminIdlocalpath = req.files?.adminId?.[0]?.buffer;
+    const profilepicturelocalpath = req.files?.profilepicture?.[0]?.buffer;
+    const appointmentletterlocalpath = req.files?.appointmentletter?.[0]?.buffer;
     if (
         !aadharlocalpath ||
         !adminIdlocalpath ||
@@ -53,10 +53,10 @@ const registeradmin = asyncHandler(async (req, res) => {
         throw new apiError(400, "All files are required");
     }
 
-    const aadhar = await uploadcloudinary(aadharlocalpath)
-    const adminId = await uploadcloudinary(adminIdlocalpath)
-    const profilepicture = await uploadcloudinary(profilepicturelocalpath)
-    const appointmentletter = await uploadcloudinary(appointmentletterlocalpath)
+    const aadhar = await uploadcloudinary(aadharlocalpath,"admin/aadhar")
+    const adminId = await uploadcloudinary(adminIdlocalpath,"admin/admin-id")
+    const profilepicture = await uploadcloudinary(profilepicturelocalpath,"admin/profile-picture")
+    const appointmentletter = await uploadcloudinary(appointmentletterlocalpath,"admin/appointment-letter")
 
     if (!aadhar || !adminId || !profilepicture || !appointmentletter) {
         throw new apiError(500, "File upload failed")
@@ -68,10 +68,10 @@ const registeradmin = asyncHandler(async (req, res) => {
         password,
         phonenumber,
         verificationdocs: {
-            aadhar: aadhar.url,
-            adminId: adminId.url,
-            profilepicture: profilepicture.url,
-            appointmentletter: appointmentletter.url
+            aadhar: aadhar.secure_url,
+            adminId: adminId.secure_url,
+            profilepicture: profilepicture.secure_url,
+            appointmentletter: appointmentletter.secure_url
         },
         adminsecret,
     })
@@ -270,11 +270,11 @@ const getprofiledetails = asyncHandler(async (req, res) => {
 })
 
 const updateprofilepic = asyncHandler(async (req, res) => {
-    const profilepicturelocalpath = req.file?.path
+    const profilepicturelocalpath = req.file?.buffer
     if (!profilepicturelocalpath) {
         throw new apiError(400, "profilepicture not found ")
     }
-    const profilepicture = await uploadcloudinary(profilepicturelocalpath)
+    const profilepicture = await uploadcloudinary(profilepicturelocalpath,"admin/profile-picture")
     if (!profilepicture) {
         throw new apiError(400, "profilepicture upload failed to server")
     }

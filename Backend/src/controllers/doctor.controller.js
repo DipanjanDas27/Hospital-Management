@@ -46,21 +46,38 @@ const registerdoctor = asyncHandler(async (req, res) => {
     if (existeddoctor) {
         throw new apiError(409, "Doctor with same email or username already exists");
     }
-    const aadharlocalpath = req.files?.aadhar?.[0]?.path;
-    const medicaldegreelocalpath = req.files?.medicaldegree?.[0]?.path;
-    const medicallicenselocalpath = req.files?.medicallicense?.[0]?.path;
-    const profilepicturelocalpath = req.files?.profilepicture?.[0]?.path;
 
-    if (!aadharlocalpath || !medicaldegreelocalpath || !medicallicenselocalpath || !profilepicturelocalpath) {
+    const aadharBuffer = req.files?.aadhar?.[0]?.buffer;
+    const medicalDegreeBuffer = req.files?.medicaldegree?.[0]?.buffer;
+    const medicalLicenseBuffer = req.files?.medicallicense?.[0]?.buffer;
+    const profilePictureBuffer = req.files?.profilepicture?.[0]?.buffer;
+
+    
+    if (
+        !aadharBuffer ||
+        !medicalDegreeBuffer ||
+        !medicalLicenseBuffer ||
+        !profilePictureBuffer
+    ) {
         throw new apiError(400, "All files are required");
     }
-    const aadhar = await uploadcloudinary(aadharlocalpath);
-    const medicaldegree = await uploadcloudinary(medicaldegreelocalpath);
-    const medicallicense = await uploadcloudinary(medicallicenselocalpath);
-    const profilepicture = await uploadcloudinary(profilepicturelocalpath);
-    if (!aadhar || !medicaldegree || !medicallicense || !profilepicture) {
+
+    
+    const aadhar = await uploadcloudinary(aadharBuffer, "doctors/aadhar");
+    const medicaldegree = await uploadcloudinary(medicalDegreeBuffer, "doctors/medical-degree");
+    const medicallicense = await uploadcloudinary(medicalLicenseBuffer, "doctors/medical-license");
+    const profilepicture = await uploadcloudinary(profilePictureBuffer, "doctors/profile-picture");
+
+    
+    if (
+        !aadhar ||
+        !medicaldegree ||
+        !medicallicense ||
+        !profilepicture
+    ) {
         throw new apiError(500, "File upload failed");
     }
+
     const shiftarray = JSON.parse(shift)
     if (!shiftarray) {
         throw new apiError(400, "Invalid format for 'shift'. Must be a valid JSON array.")
@@ -74,10 +91,10 @@ const registerdoctor = asyncHandler(async (req, res) => {
         sex,
         age,
         verificationdocument: {
-            aadhar: aadhar.url,
-            medicaldegree: medicaldegree.url,
-            medicallicense: medicallicense.url,
-            profilepicture: profilepicture.url,
+            aadhar: aadhar.secure_url,
+            medicaldegree: medicaldegree.secure_url,
+            medicallicense: medicallicense.secure_url,
+            profilepicture: profilepicture.secure_url,
         },
         experience,
         qualification,
@@ -266,7 +283,7 @@ const getdoctorprofiledetailsprivate = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, doctor, "profile fetched successfully"))
 })
 const updateprofile = asyncHandler(async (req, res) => {
-    const { doctorname, email, phonenumber, age, sex, experience, qualification,department, specialization, shift } = req.body;
+    const { doctorname, email, phonenumber, age, sex, experience, qualification, department, specialization, shift } = req.body;
 
     const updates = {};
     if (doctorname) updates.doctorname = doctorname;
@@ -316,11 +333,11 @@ const getalldoctorprofiledetails = asyncHandler(async (req, res) => {
 });
 
 const updateprofilepic = asyncHandler(async (req, res) => {
-    const profilepicturelocalpath = req.file?.path
+    const profilepicturelocalpath = req.file?.buffer;
     if (!profilepicturelocalpath) {
         throw new apiError(400, "profilepicture not found ")
     }
-    const profilepicture = await uploadcloudinary(profilepicturelocalpath)
+    const profilepicture = await uploadcloudinary(profilepicturelocalpath,"doctors/profile-picture")
     if (!profilepicture) {
         throw new apiError(400, "profilepicture upload failed to server")
     }
@@ -328,7 +345,7 @@ const updateprofilepic = asyncHandler(async (req, res) => {
         req.doctor?._id,
         {
             $set: {
-                profilepicture: profilepicture.url
+                profilepicture: profilepicture.secure_url
             }
         },
         {
@@ -343,18 +360,18 @@ const updateprofilepic = asyncHandler(async (req, res) => {
 })
 
 const updatedocument = asyncHandler(async (req, res) => {
-    const medicaldegreelocalpath = req.files?.medicaldegree?.[0]?.path;
-    const medicallicenselocalpath = req.files?.medicallicense?.[0]?.path;
+    const medicaldegreelocalpath = req.files?.medicaldegree?.[0]?.buffer;
+    const medicallicenselocalpath = req.files?.medicallicense?.[0]?.buffer;
     if (!medicaldegreelocalpath && !medicallicenselocalpath) {
         throw new apiError(400, "Atleast one Document is required .")
     }
     let medicaldegree, medicallicense
 
     if (medicaldegreelocalpath) {
-        medicaldegree = await uploadcloudinary(medicaldegreelocalpath)
+        medicaldegree = await uploadcloudinary(medicaldegreelocalpath,"doctors/medical-degree")
     }
     if (medicallicenselocalpath) {
-        medicallicense = await uploadcloudinary(medicallicenselocalpath)
+        medicallicense = await uploadcloudinary(medicallicenselocalpath,"doctors/medical-license")
     }
     if (!medicaldegree && !medicallicense) {
         throw new apiError(400, "Error while uploading new files ")
@@ -363,8 +380,8 @@ const updatedocument = asyncHandler(async (req, res) => {
         req.doctor?._id,
         {
             $set: {
-                medicaldegree: medicaldegree?.url || "",
-                medicallicense: medicallicense?.url || ""
+                medicaldegree: medicaldegree?.secure_url || "",
+                medicallicense: medicallicense?.secure_url || ""
             }
         },
         {

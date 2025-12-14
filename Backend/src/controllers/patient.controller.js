@@ -292,7 +292,7 @@ const updateprofilepic = asyncHandler(async (req, res) => {
     if (!profilepicturelocalpath) {
         throw new apiError(400, "profilepicture not found ")
     }
-    const profilepicture = await uploadcloudinary(profilepicturelocalpath)
+    const profilepicture = await uploadcloudinary(profilepicturelocalpath, "patients/profile-pictures")
     if (!profilepicture) {
         throw new apiError(400, "profilepicture upload failed to server")
     }
