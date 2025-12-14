@@ -1,22 +1,29 @@
-import { v2 as cloudinary } from "cloudinary"
-import fs from "fs"
+// utils/cloudinary.js
+import { v2 as cloudinary } from "cloudinary";
 
-const uploadcloudinary = async (localpath) => {
-    try {
+export const uploadcloudinary = async (buffer, folder = "hms") => {
+  if (!buffer) return null;
 
-        if (!localpath) return null
-        const response = await cloudinary.uploader.upload(localpath, {
-            resource_type: "auto",
-            secure: true
-        })
-        console.log(`File has been successfully uploaded-- ${response.url}`)
-        fs.unlinkSync(localpath) 
-        return response
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          resource_type: "auto",
+          secure: true,
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
 
-    } catch (error) {
-        console.log("File Upload Error:", error)
-        fs.unlink(localpath)
-        return null
-    }
-}
-export {uploadcloudinary}
+      stream.end(buffer);
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Cloudinary upload failed:", error);
+    throw error; 
+  }
+};

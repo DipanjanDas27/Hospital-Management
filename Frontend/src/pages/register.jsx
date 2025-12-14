@@ -41,7 +41,6 @@ const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth || {});
-  console.log(error)
 
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -75,7 +74,7 @@ const Register = () => {
       const res = await dispatch(registerPatient(formData));
       if (res.meta.requestStatus === "fulfilled") {
         toast.success("Registration successful! Welcome to NovaMed");
-        navigate("/");
+        navigate("/login");
       } else {
         toast.error(res.payload?.message || "Registration failed!");
       }

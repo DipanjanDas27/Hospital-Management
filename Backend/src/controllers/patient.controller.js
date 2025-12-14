@@ -25,7 +25,7 @@ const generateaccesstokenandrefreshtoken = async (patientId) => {
         patient.refreshtoken = refreshtoken;
         await patient.save({ validateBeforeSave: false });
 
-        return { accesstoken, newrefreshtoken:refreshtoken };
+        return { accesstoken, newrefreshtoken: refreshtoken };
 
     } catch (error) {
         console.error("Token generation failed:", error);
@@ -37,7 +37,7 @@ const registerPatient = asyncHandler(async (req, res) => {
     const { patientname, patientusername, email, password, phonenumber, age, sex } = req.body
 
     if (
-        [patientname, patientusername, email, phonenumber, age, sex, password ].some((field) => !field || field?.trim() === "")
+        [patientname, patientusername, email, phonenumber, age, sex, password].some((field) => !field || field?.trim() === "")
     ) {
         throw new apiError(400, "All fields are required")
     }
@@ -47,16 +47,24 @@ const registerPatient = asyncHandler(async (req, res) => {
     if (existedpatient) {
         throw new apiError(409, "patient with same email or username already exist")
     }
-    let profilepicture;
     let guardianName;
-    if(req.body.guardianName){
+    if (req.body.guardianName) {
         guardianName = req.body.guardianName;
     }
 
-    if (req.file?.path) {
-        const profilepicturelocalpath = req.file.path;
-        profilepicture = await uploadcloudinary(profilepicturelocalpath);
+    let profilepicture;
+
+    if (req.file?.buffer) {
+        profilepicture = await uploadcloudinary(
+            req.file.buffer,
+            "patients/profile-pictures"
+        );
     }
+
+    if (!profilepicture) {
+        throw new apiError(400, "Profile picture upload failed");
+    }
+
     const patient = await Patient.create({
         patientname,
         patientusername,
@@ -66,7 +74,7 @@ const registerPatient = asyncHandler(async (req, res) => {
         age,
         sex,
         guardianName: guardianName || "",
-        profilepicture: profilepicture?.url || ""
+        profilepicture: profilepicture?.secure_url || ""
     })
 
     if (!patient) {
@@ -121,12 +129,12 @@ const loginPatient = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .cookie("accessToken", accesstoken, options)
-        .cookie("refreshToken",newrefreshtoken, options)
+        .cookie("refreshToken", newrefreshtoken, options)
         .json(
             new apiResponse(
                 200,
                 {
-                    user: loggedinpatient, accesstoken, refreshtoken:newrefreshtoken
+                    user: loggedinpatient, accesstoken, refreshtoken: newrefreshtoken
                 },
                 "User logged In Successfully"
             )
@@ -280,8 +288,7 @@ const getprofiledetails = asyncHandler(async (req, res) => {
 })
 
 const updateprofilepic = asyncHandler(async (req, res) => {
-    const profilepicturelocalpath = req.file?.path
-    console.log(req.file)
+    const profilepicturelocalpath = req.file?.buffer
     if (!profilepicturelocalpath) {
         throw new apiError(400, "profilepicture not found ")
     }
@@ -293,7 +300,7 @@ const updateprofilepic = asyncHandler(async (req, res) => {
         req.patient?._id,
         {
             $set: {
-                profilepicture: profilepicture.url
+                profilepicture: profilepicture.secure_url
             }
         },
         {
@@ -307,12 +314,12 @@ const updateprofilepic = asyncHandler(async (req, res) => {
         .json(new apiResponse(200, updatedpatient, "profilepicture updated successfully"))
 })
 
-const getPatient= asyncHandler(async (req,res) => {
-     const patient = await Patient.findById(req.patient?._id).select("-password -refreshtoken");
-        if (!patient) {
-            throw new apiError(404, "patient not found");
-        }
-        return res.status(200).json(new apiResponse(200, patient, "Current patient fetched successfully"));
-    
+const getPatient = asyncHandler(async (req, res) => {
+    const patient = await Patient.findById(req.patient?._id).select("-password -refreshtoken");
+    if (!patient) {
+        throw new apiError(404, "patient not found");
+    }
+    return res.status(200).json(new apiResponse(200, patient, "Current patient fetched successfully"));
+
 });
-export { registerPatient, loginPatient, logoutPatient, accesstokenrenewal, updatepassword, resetForgottenPassword, updateprofile, getprofiledetails, updateprofilepic,getPatient };
+export { registerPatient, loginPatient, logoutPatient, accesstokenrenewal, updatepassword, resetForgottenPassword, updateprofile, getprofiledetails, updateprofilepic, getPatient };
