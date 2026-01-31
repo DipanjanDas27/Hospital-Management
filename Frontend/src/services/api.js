@@ -1,10 +1,10 @@
-// src/services/patientApi.js
+
 import axios from "axios";
 
 
 const api = axios.create({
   baseURL: "https://backend-rose-six-eyc7qvg7ik.vercel.app/api/v1/patient",
-  withCredentials: true, // needed for refreshToken cookie
+  withCredentials: true, 
 });
 
 
@@ -40,41 +40,41 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If error is not 401 → return normally
+    
     if (!error.response || error.response.status !== 401) {
       return Promise.reject(error);
     }
 
-    // If no refresh cookie exists → do not try refresh
+    
     if (!hasRefreshCookie()) {
       return Promise.reject(error);
     }
 
-    // Prevent infinite loops
+    
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // If refresh already in progress → queue this request
+    
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({
           resolve: (token) => {
             originalRequest.headers = originalRequest.headers || {};
             originalRequest.headers["Authorization"] = `Bearer ${token}`;
-            resolve(api(originalRequest)); // retry original request
+            resolve(api(originalRequest)); 
           },
           reject,
         });
       });
     }
 
-    // Mark for retry
+    
     originalRequest._retry = true;
     isRefreshing = true;
 
     try {
-      // Call refresh endpoint WITHOUT using `api` instance
+      
       const refreshRes = await axios.post(
         "https://backend-rose-six-eyc7qvg7ik.vercel.app/api/v1/patient/renew-access-token",
         {},
@@ -84,14 +84,14 @@ api.interceptors.response.use(
       const newAccessToken = refreshRes?.data?.data?.accessToken;
       if (!newAccessToken) throw new Error("No access token returned on refresh");
 
-      // Set header for all future requests
+      
       api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
 
-      // Process queued requests
+      
       processQueue(null, newAccessToken);
       isRefreshing = false;
 
-      // Retry original request
+      
       originalRequest.headers = originalRequest.headers || {};
       originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
       return api(originalRequest);
