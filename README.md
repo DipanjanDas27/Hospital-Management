@@ -1,140 +1,55 @@
-# 🏥 Hospital Management System (HMS)
+# 🏥 Hospital Management System (MERN)
 
-A fullstack Hospital Management System built using the MERN stack, designed to handle real-world hospital workflows including authentication, role-based dashboards, and appointment management.
-
----
+A fullstack Hospital Management System built with the MERN stack, implementing authentication, role-based dashboards, and appointment workflow management.
 
 ## 🚀 Live Demo
-
 🔗 https://patient-gilt.vercel.app
 
 ---
 
-## 📌 Overview
+## 📌 Key Features
 
-This project simulates a real-world hospital environment with separate dashboards and workflows for:
-
-- Admin
-- Doctor
-- Patient
-
-The system manages authentication, appointment booking, role-based access control, and structured backend APIs.
-
-The goal of this project was to understand end-to-end application architecture — from backend API design to frontend integration and deployment.
+- JWT-based authentication
+- Role-Based Access Control (Admin / Doctor / Patient)
+- Appointment booking & management
+- Structured REST APIs
+- Modular backend architecture
 
 ---
 
 ## 🛠 Tech Stack
 
-### Frontend
-- React
-- Tailwind CSS
-- Redux (if used)
-- Vite
-
-### Backend
-- Node.js
-- Express.js
-- REST API Architecture
-
-### Database
-- MongoDB
-
-### Other Tools & Concepts
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- RESTful API Design
-- Deployment (Vercel / Render)
+**Frontend:** React, Tailwind CSS, Vite  
+**Backend:** Node.js, Express.js  
+**Database:** MongoDB  
+**Concepts:** REST API, JWT, RBAC
 
 ---
 
-## 🔐 Core Features
+## 🏗 Architecture
 
-### 👤 Authentication
-- Secure login & registration
-- JWT-based authentication
-- Protected routes
+Client (React) → Express API → MongoDB
 
-### 🧑‍⚕️ Role-Based Dashboards
-- Admin dashboard
-- Doctor dashboard
-- Patient dashboard
-- Controlled access based on user roles
+---
 
-### 📅 Appointment Management
-- Book appointments
-- View appointment history
-- Workflow handling between doctor and patient
+## ⚙️ Run Locally
 
-### 📊 Backend API Design
-- Modular controller-based structure
-- Structured RESTful APIs
-- Error handling middleware
-
-## ⚙️ Installation & Setup
-
-### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/DipanjanDas27/Hospital-Management.git
+cd Backend && npm install
+cd ../Frontend && npm install
 ```
-https://github.com/DipanjanDas27/Hospital-Management.git
-```
-### 2️⃣ Install dependencies
-Backend:
-```
-cd Backend
-npm install
-```
-Frontend:
-```
-cd Frontend
-npm install
-```
-Admin:
-```
-cd Admin
-npm install
-```
-Doctor:
-```
-cd Doctor
-npm install
-```
-### 3️⃣ Run development servers
-
-Backend & Frontend:
-```
+## Run backend and frontend using:
+```bash
 npm run dev
 ```
+## 🧠 What This Project Demonstrates
 
----
-
-## 🧠 What I Learned
-
-- Structuring backend APIs
-- Designing database schemas
-- Implementing authentication & authorization
-- Managing frontend-backend integration
-- Deploying fullstack applications
-
----
-
-## 📈 Future Improvements
-
-- UI refinement & responsiveness improvements
-- Pagination & search optimization
-- Admin analytics dashboard
-- Performance optimizations
-- Improved validation handling
-
----
-
-## 🤝 Contributing
-
-This project is open for improvements and learning-based contributions.
-
----
+- End-to-end fullstack implementation
+- Backend API structuring
+- Database schema design
+- Authentication & authorization handling
 
 ## 📧 Contact
-
-**Dipanjan Das**  
-📩 dipanjandas2758@gmail.com  
-🔗 LinkedIn: https://www.linkedin.com/in/dipanjan-das-65b023290/
+Dipanjan Das-
+📩 dipanjandas2758@gmail.com
