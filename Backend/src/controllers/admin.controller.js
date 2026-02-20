@@ -134,16 +134,25 @@ const loginadmin = asyncHandler(async (req, res) => {
         html: logintemplate(loggedinadmin.adminname),
     });
 
-    const options = {
+    
+    const options1 = {
         httpOnly: true,
         secure: true,
         sameSite: "None",
         path: "/",
+        maxAge: 1 * 24 * 60 * 60 * 1000
+    }
+    const options2 = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        maxAge: 20 * 24 * 60 * 60 * 1000
     }
     return res
         .status(200)
-        .cookie("accesstoken", accesstoken, options)
-        .cookie("refreshtoken", refreshtoken, options)
+        .cookie("accesstoken", accesstoken, options1)
+        .cookie("refreshtoken", refreshtoken, options2)
         .json(new apiResponse(200, { user: loggedinadmin, accesstoken, refreshtoken }, "Admin logged in successfully"))
 
 
@@ -155,8 +164,7 @@ const logoutadmin = asyncHandler(async (req, res, next) => {
         httpOnly: true,
         secure: true,
         sameSite: "None",
-        path: "/"
-
+        path: "/",
     }
     return res
         .status(200)

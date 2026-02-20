@@ -22,7 +22,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (!error.response || error.response.status !== 401) {
+    if (
+      !error.response ||
+      error.response.status !== 401 ||
+      originalRequest.url.includes("renew-access-token")
+    ) {
       return Promise.reject(error);
     }
 
@@ -43,7 +47,6 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      
       await api.post("/renew-access-token");
 
       processQueue(null);
@@ -58,5 +61,4 @@ api.interceptors.response.use(
     }
   }
 );
-
 export default api;

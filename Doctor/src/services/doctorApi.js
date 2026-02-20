@@ -185,17 +185,9 @@ const hasRefreshCookie = () => {
 export const getCurrentDoctor = createAsyncThunk(
     "doctor/getCurrentDoctorForDoctor",
     async (_, { rejectWithValue }) => {
-        try {
-      
-      try {
-        await api.post("/renew-access-token", {}, { timeout: 8000 });
-      } catch (e) {
-       
-      }
-
+          try {
       const res = await api.get("/get-doctor");
       return res.data.data;
-
     } catch (error) {
       return rejectWithValue(null);
     }

@@ -165,17 +165,9 @@ export const getdoctorbydepartment= createAsyncThunk("patient/getdoctorbydepartm
 export const getCurrentPatient = createAsyncThunk(
   "auth/getCurrentPatient",
   async (_, { rejectWithValue }) => {
-    try {
-      
-      try {
-        await api.post("/renew-access-token", {}, { timeout: 8000 });
-      } catch (e) {
-       
-      }
-
+     try {
       const res = await api.get("/get-patient");
       return res.data.data;
-
     } catch (error) {
       return rejectWithValue(null);
     }

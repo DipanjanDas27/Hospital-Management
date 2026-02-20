@@ -120,16 +120,24 @@ const loginPatient = asyncHandler(async (req, res) => {
         html: logintemplate(loggedinpatient.patientname),
     });
 
-    const options = {
+    const options1 = {
         httpOnly: true,
         secure: true,
         sameSite: "none",
         path: "/",
+        maxAge: 1 * 24 * 60 * 60 * 1000
+    }
+    const options2 = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        maxAge: 20 * 24 * 60 * 60 * 1000
     }
     return res
         .status(200)
-        .cookie("accessToken", accesstoken, options)
-        .cookie("refreshToken", newrefreshtoken, options)
+        .cookie("accessToken", accesstoken, options1)
+        .cookie("refreshToken", newrefreshtoken, options2)
         .json(
             new apiResponse(
                 200,

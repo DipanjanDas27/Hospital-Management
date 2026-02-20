@@ -262,21 +262,13 @@ export const adminUpdateDepartment = createAsyncThunk(
     }
 );
 export const getAdmin = createAsyncThunk(
-    "admin/getAdmin",
-    async (_, { rejectWithValue }) => {
-        try {
-      
-      try {
-        await api.post("/renew-access-token", {}, { timeout: 8000 });
-      } catch (e) {
-       
-      }
-
+  "admin/getAdmin",
+  async (_, { rejectWithValue }) => {
+    try {
       const res = await api.get("/get-admin");
       return res.data.data;
-
     } catch (error) {
       return rejectWithValue(null);
     }
-    }
+  }
 );
