@@ -193,16 +193,24 @@ const accesstokenrenewal = asyncHandler(async (req, res) => {
     const { accesstoken, newrefreshtoken } = await generateaccesstokenandrefreshtoken(admin._id);
 
 
-    const options = {
+    const options1 = {
         httpOnly: true,
         secure: true,
         sameSite: "None",
         path: "/",
+        maxAge: 1 * 24 * 60 * 60 * 1000
+    }
+    const options2 = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        maxAge: 20 * 24 * 60 * 60 * 1000
     }
     return res
         .status(200)
-        .cookie("accesstoken", accesstoken, options)
-        .cookie("refreshtoken", newrefreshtoken, options)
+        .cookie("accesstoken", accesstoken, options1)
+        .cookie("refreshtoken", newrefreshtoken, options2)
         .json(new apiResponse(200, { accesstoken, refreshtoken: newrefreshtoken }, "Access token renewed successfully"));
 
 })
