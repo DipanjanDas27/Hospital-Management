@@ -265,10 +265,18 @@ export const getAdmin = createAsyncThunk(
     "admin/getAdmin",
     async (_, { rejectWithValue }) => {
         try {
-            const res = await api("/get-admin");
-            return res.data.data;
-        } catch (err) {
-            return rejectWithValue(null);
-        }
+      
+      try {
+        await api.post("/renew-access-token", {}, { timeout: 8000 });
+      } catch (e) {
+       
+      }
+
+      const res = await api.get("/get-admin");
+      return res.data.data;
+
+    } catch (error) {
+      return rejectWithValue(null);
+    }
     }
 );
