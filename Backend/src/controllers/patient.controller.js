@@ -54,7 +54,7 @@ const registerPatient = asyncHandler(async (req, res) => {
 
     let profilepicture;
 
-    if (req.file?.buffer) {
+    if (req.file) {
         profilepicture = await uploadcloudinary(
             req.file.buffer,
             "patients/profile-pictures"
@@ -62,7 +62,7 @@ const registerPatient = asyncHandler(async (req, res) => {
     }
 
     if (!profilepicture) {
-        throw new apiError(400, "Profile picture upload failed");
+       console.error("profile picture is missing or failed to upload ")
     }
 
     const patient = await Patient.create({
