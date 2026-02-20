@@ -5,9 +5,10 @@ import AppointmentCard from "@/components/custom/AppointmentCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Loader2, 
-  Calendar, 
+import { Navigate, useNavigate } from "react-router-dom";
+import {
+  Loader2,
+  Calendar,
   AlertCircle,
   CalendarClock
 } from "lucide-react";
@@ -17,7 +18,7 @@ const AllAppointments = () => {
   const { appointments, loading, error } = useSelector(
     (state) => state.appointment
   );
-
+  const navigate = useNavigate()
   useEffect(() => {
     dispatch(getAllAppointments());
   }, [dispatch]);

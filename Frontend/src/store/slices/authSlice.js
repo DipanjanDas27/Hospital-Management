@@ -31,7 +31,7 @@ const authSlice = createSlice({
 
     builder.addCase(registerPatient.fulfilled, (state, action) => {
       state.user = action.payload || null;
-      state.isAuthenticated = true;
+      state.isAuthenticated = false;
       state.isInitialized = true;
     })
 
