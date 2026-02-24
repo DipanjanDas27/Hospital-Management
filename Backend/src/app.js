@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import cookieparser from "cookie-parser"
-import { apiError } from "./utils/apiError.js"
+
 
 
 const app = express()
@@ -14,7 +14,7 @@ const allowedOrigins = [
 app.use(
     cors({
         origin: function (origin, callback) {
-            if (!origin) return callback(null, true); // allow Postman/localhost
+            if (!origin) return callback(null, true); 
             if (allowedOrigins.includes(origin)) {
                 callback(null, true);
             } else {
@@ -34,6 +34,23 @@ import doctorRouter from "./routes/doctor.route.js"
 import adminRouter from "./routes/admin.route.js"
 import appointmentRouter from "./routes/appointment.route.js"
 import cronRoutes from "./routes/cron.route.js";
+import { errorMiddleware } from "./middlewares/error.middleware.js"
+import rateLimit from "express-rate-limit";
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+});
+
+app.use(limiter);
+app.use("/api/v1/patient/login", authLimiter);
+app.use("/api/v1/doctor/login", authLimiter);
+app.use("/api/v1/admin/login", authLimiter);
 
 
 app.use("/api/v1", cronRoutes);
@@ -41,6 +58,7 @@ app.use("/api/v1/patient", patientRouter)
 app.use("/api/v1/doctor", doctorRouter)
 app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/patient/appointments", appointmentRouter)
+app.use(errorMiddleware);
 
 app.get("/", (req, res) => {
     res.send("Backend is running successfully!");
@@ -48,24 +66,6 @@ app.get("/", (req, res) => {
 
 
 
-app.use((err, req, res, next) => {
-    console.error("Error caught by middleware:", err);
-
-    if (err instanceof apiError) {
-        return res.status(err.statusCode || 500).json({
-            success: false,
-            message: err.message || "Something went wrong",
-            errors: err.errors || [],
-            stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-        });
-    }
-
-    return res.status(500).json({
-        success: false,
-        message: err.message || "Internal server error",
-        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-    });
-});
 
 export { app }
 export default app;
