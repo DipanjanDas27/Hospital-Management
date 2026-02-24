@@ -1,62 +1,74 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
-    registerPatient,
-    loginPatient,
-    logoutPatient,
-    updatepassword,
-    updateprofile,
-    resetForgottenPassword,
-    accesstokenrenewal,
-    getprofiledetails,
-    updateprofilepic,
-    getPatient
-} from '../controllers/patient.controller.js';
+  registerPatient,
+  loginPatient,
+  logoutPatient,
+  updatepassword,
+  updateprofile,
+  resetForgottenPassword,
+  accesstokenrenewal,
+  getprofiledetails,
+  updateprofilepic,
+  getPatient,
+} from "../controllers/patient.controller.js";
 import {
-    sendotp,
-    verifyotp,
-    sendForgetPasswordOtp, 
-    verifyForgotPasswordOtp,
+  sendotp,
+  verifyotp,
+  sendForgetPasswordOtp,
+  verifyForgotPasswordOtp,
 } from "../controllers/otp.controller.js";
-import { verifypatient } from "../middlewares/patientauth.middleware.js"
-import { upload } from '../middlewares/multer.middleware.js';
-import { verifyTempjwt } from '../middlewares/verifytempjwt.middleware.js';
-import { getalldoctorprofiledetails, getdoctorbydept, getdoctorprofiledetails } from '../controllers/doctor.controller.js';
-import { getAllDepartments } from '../controllers/department.controller.js';
-import { getprescription, getallprescriptionsforpatient, getprescriptionbyappointment } from '../controllers/prescription.contorller.js';
-import { getlabtest, getalllabtestsforpatient, getlabtestbyprescription } from '../controllers/labtest.controller.js';
+import { verifyAuth } from "../middlewares/auth.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
+import { verifyTempjwt } from "../middlewares/verifytempjwt.middleware.js";
+import {
+  getalldoctorprofiledetails,
+  getdoctorbydept,
+  getdoctorprofiledetails,
+} from "../controllers/doctor.controller.js";
+import { getAllDepartments } from "../controllers/department.controller.js";
+import {
+  getprescription,
+  getallprescriptionsforpatient,
+  getprescriptionbyappointment,
+} from "../controllers/prescription.contorller.js";
+import {
+  getlabtest,
+  getalllabtestsforpatient,
+  getlabtestbyprescription,
+} from "../controllers/labtest.controller.js";
 
 const router = Router();
 
-router.route("/register").post(upload.single("profilepicture"), registerPatient);
-router.route("/login").post(loginPatient);
-router.route("/logout").post(verifypatient, logoutPatient);
-router.route("/update-profile").patch(verifypatient, updateprofile);
-router.route("/update-profilepicture").patch(verifypatient, upload.single("profilepicture"), updateprofilepic);
-router.route("/get-profile").get(verifypatient, getprofiledetails);
-router.route("/get-patient").get(verifypatient, getPatient);
-router.route("/renew-access-token").post(accesstokenrenewal);
+router.post("/register", upload.single("profilepicture"), registerPatient);
+router.post("/login", loginPatient);
+router.post("/logout", verifyAuth, logoutPatient);
 
-router.route("/update-password/send-otp").post(verifypatient, sendotp);
-router.route("/update-password/verify-otp").post(verifypatient, verifyotp);
-router.route("/update-password").patch(verifypatient, updatepassword);
+router.patch("/update-profile", verifyAuth, updateprofile);
+router.patch("/update-profilepicture", verifyAuth, upload.single("profilepicture"), updateprofilepic);
 
-router.route("/forgot-password/send-otp").post(sendForgetPasswordOtp);
-router.route("/forgot-password/verify-otp").post(verifyTempjwt, verifyForgotPasswordOtp);
-router.route("/forgot-password/update-password").patch(verifyTempjwt, resetForgottenPassword);
+router.get("/get-profile", verifyAuth, getprofiledetails);
+router.get("/get-patient", verifyAuth, getPatient);
+router.post("/renew-access-token", accesstokenrenewal);
 
-router.route("/doctors/:doctorid").get(verifypatient, getdoctorprofiledetails);
-router.route("/doctors").get(verifypatient, getalldoctorprofiledetails);
-router.route("/departments").get(verifypatient,getAllDepartments);
-router.route("/departments/:deptname/doctors").get(verifypatient,getdoctorbydept); 
+router.post("/update-password/send-otp", verifyAuth, sendotp);
+router.post("/update-password/verify-otp", verifyAuth, verifyotp);
+router.patch("/update-password", verifyAuth, updatepassword);
 
-// Prescription routes - Read only access for patients (their own prescriptions)
-router.route("/prescriptions").get(verifypatient, getallprescriptionsforpatient);
-router.route("/prescriptions/appointment/:appointmentid").get(verifypatient, getprescriptionbyappointment);
-router.route("/prescriptions/:prescriptionid").get(verifypatient, getprescription);
+router.post("/forgot-password/send-otp", sendForgetPasswordOtp);
+router.post("/forgot-password/verify-otp", verifyTempjwt, verifyForgotPasswordOtp);
+router.patch("/forgot-password/update-password", verifyTempjwt, resetForgottenPassword);
 
-// Labtest routes - Read only access for patients (their own lab tests)
-router.route("/labtests").get(verifypatient, getalllabtestsforpatient);
-router.route("/labtests/prescription/:prescriptionid").get(verifypatient, getlabtestbyprescription);
-router.route("/labtests/:labtestid").get(verifypatient, getlabtest);
+router.get("/doctors/:doctorid", verifyAuth, getdoctorprofiledetails);
+router.get("/doctors", verifyAuth, getalldoctorprofiledetails);
+router.get("/departments", verifyAuth, getAllDepartments);
+router.get("/departments/:deptname/doctors", verifyAuth, getdoctorbydept);
+
+router.get("/prescriptions", verifyAuth, getallprescriptionsforpatient);
+router.get("/prescriptions/appointment/:appointmentid", verifyAuth, getprescriptionbyappointment);
+router.get("/prescriptions/:prescriptionid", verifyAuth, getprescription);
+
+router.get("/labtests", verifyAuth, getalllabtestsforpatient);
+router.get("/labtests/prescription/:prescriptionid", verifyAuth, getlabtestbyprescription);
+router.get("/labtests/:labtestid", verifyAuth, getlabtest);
 
 export default router;

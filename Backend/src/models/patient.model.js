@@ -24,11 +24,10 @@ const patientSchema = new Schema({
     },
     password: {
         type: String,
-        maxlength: 15,
         minlength: 8,
         required: true,
         trim: true,
-
+        select: false,
     },
     phonenumber: {
         type: Number,
@@ -49,6 +48,7 @@ const patientSchema = new Schema({
     },
     refreshtoken:{
         type:String,
+        select:false,
     },
     profilepicture: {
         type: String,

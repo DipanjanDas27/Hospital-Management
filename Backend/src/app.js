@@ -33,7 +33,10 @@ import patientRouter from "./routes/patient.route.js"
 import doctorRouter from "./routes/doctor.route.js"
 import adminRouter from "./routes/admin.route.js"
 import appointmentRouter from "./routes/appointment.route.js"
+import cronRoutes from "./routes/cron.route.js";
 
+
+app.use("/api/v1", cronRoutes);
 app.use("/api/v1/patient", patientRouter)
 app.use("/api/v1/doctor", doctorRouter)
 app.use("/api/v1/admin", adminRouter)

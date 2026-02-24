@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-const apointmentSchema = new mongoose.Schema({
+const appointmentSchema = new mongoose.Schema({
     patientdetails: {
         type: mongoose.Schema.Types.Mixed,
         ref: 'Patient',
@@ -32,8 +32,7 @@ const apointmentSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Confirmed', 'Cancelled', 'Completed'],
-        default: 'Pending',
+        enum: [ 'Confirmed', 'Cancelled', 'Completed'],
     },
     deleteafter: {
         type: Date,
@@ -42,4 +41,10 @@ const apointmentSchema = new mongoose.Schema({
     }
 },
     { timestamps: true, });
-export const Appointment = mongoose.model('Appointment', apointmentSchema);
+
+
+appointmentSchema.index(
+    { "doctordetails.doctorusername": 1, appointmentdate: 1, appointmenttime: 1 },
+    { unique: true }
+);
+export const Appointment = mongoose.model('Appointment', appointmentSchema);

@@ -154,7 +154,7 @@ const logoutPatient = asyncHandler(async (req, res) => {
         req.patient._id,
         {
             $unset: {
-                refreshToken: 1
+                refreshtoken: 1
             }
         },
         {
@@ -177,7 +177,7 @@ const logoutPatient = asyncHandler(async (req, res) => {
 })
 
 const accesstokenrenewal = asyncHandler(async (req, res) => {
-    const { refreshToken } = req.cookies;  // ✅ FIXED NAME
+    const { refreshToken } = req.cookies;  
 
     if (!refreshToken) {
         throw new apiError(401, "Unauthorized request");

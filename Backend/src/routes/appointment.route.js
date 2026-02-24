@@ -1,15 +1,21 @@
 import { Router } from "express";
-import { verifypatient } from "../middlewares/patientauth.middleware.js";
-import { createAppointment,cancelappointment,updateappointment,getappointment,getallappointmentforpatient,checkavailability } from "../controllers/appointment.controller.js";
-const router = Router()
+import {
+  createAppointment,
+  cancelappointment,
+  updateappointment,
+  getappointment,
+  getallappointmentforpatient,
+  checkavailability,
+} from "../controllers/appointment.controller.js";
+import { verifyAuth } from "../middlewares/auth.middleware.js";
 
+const router = Router();
 
-router.route("/availability").get(verifypatient, checkavailability);
-router.route("/").get(verifypatient, getallappointmentforpatient)
-router.route("/book-appointment/:doctorid").post(verifypatient, createAppointment);
-router.route("/cancelAppointment/:appointmentid").post(verifypatient, cancelappointment);
-router.route("/updateappointment/:appointmentid").patch(verifypatient, updateappointment);
-router.route("/:appointmentid").get(verifypatient, getappointment)
+router.get("/availability", verifyAuth, checkavailability);
+router.get("/", verifyAuth, getallappointmentforpatient);
+router.post("/book-appointment/:doctorid", verifyAuth, createAppointment);
+router.post("/cancelAppointment/:appointmentid", verifyAuth, cancelappointment);
+router.patch("/updateappointment/:appointmentid", verifyAuth, updateappointment);
+router.get("/:appointmentid", verifyAuth, getappointment);
 
-
-export default router
+export default router;

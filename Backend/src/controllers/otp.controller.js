@@ -77,7 +77,7 @@ const sendForgetPasswordOtp = asyncHandler(async (req, res) => {
             role: user.role
         },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: "10m" }
+        { expiresIn: "5m" }
     );
 
     const otp = generateOtp();
